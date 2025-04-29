@@ -1,0 +1,97 @@
+basePath: /
+definitions:
+  models.LoginInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.LoginOutput:
+    type: object
+  models.RegisterInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  models.RegisterOutput:
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Это документация для вашего API
+  title: Messenger API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: логинит нового пользователя и возвращает JWT токен
+      parameters:
+      - description: Данные регистрации
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginOutput'
+      security:
+      - BearerAuth: []
+      summary: Login
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Регистрирует нового пользователя
+      parameters:
+      - description: Данные регистрации
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RegisterOutput'
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
+  /ws:
+    get:
+      description: websocket коннект
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: WebSocket
+      tags:
+      - websocket
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
