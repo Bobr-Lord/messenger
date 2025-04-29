@@ -16,7 +16,7 @@ func ParseJWT(tokenStr string) (uint, error) {
 	tokenStr = parts[1]
 
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-		return jwtutil.GetPublicKey(), nil
+		return jwtutil.GetPublicKey()
 	})
 	if err != nil || !token.Valid {
 		return 0, fmt.Errorf("invalid token")

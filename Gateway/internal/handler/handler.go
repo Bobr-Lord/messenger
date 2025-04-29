@@ -5,17 +5,23 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	_ "gitlab.com/bobr-lord-messenger/gateway/docs" // тут будет документация
+	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
 )
 
 type Handler struct {
+	service *service.Service
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(srv *service.Service) *Handler {
+	return &Handler{
+		service: srv,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.New()
+	r.Use(middleware.RequestMiddleware())
 	r.GET("/ws", h.Websocket)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	auth := r.Group("/auth")

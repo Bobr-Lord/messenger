@@ -5,7 +5,9 @@ import (
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
 	hand "gitlab.com/bobr-lord-messenger/gateway/internal/handler"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/jwtutil"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/repository"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/server"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,8 +35,10 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Failed to load keys: %v", err)
 	}
+	repo := repository.NewRepository()
+	srvc := service.NewService(repo)
+	handler := hand.NewHandler(srvc)
 	srvr := server.NewServer()
-	handler := hand.NewHandler()
 	srvr.Run(cfg, handler.InitRoutes())
 
 	wait := make(chan os.Signal, 1)
