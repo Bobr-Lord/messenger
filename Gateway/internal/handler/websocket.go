@@ -1,28 +1,14 @@
 package handler
 
 import (
-	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"github.com/redis/go-redis/v9"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/bobr-lord-messenger/gateway/internal/jwt"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
+	"log"
 	"net/http"
 )
-
-var (
-	connections = make(map[string]*websocket.Conn)
-	ctx         = context.Background()
-	upgrader    = websocket.Upgrader{}
-	redisConn   *redis.Client
-)
-
-func initRedis() {
-	redisConn = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-	})
-}
 
 // Websocket godoc
 // @Security BearerAuth
@@ -35,28 +21,61 @@ func (h *Handler) Websocket(c *gin.Context) {
 	if !exists {
 		requestID = "unknown"
 	}
+	userHeader, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+	userID, ok := userHeader.(string)
+	if !ok {
+		c.Status(http.StatusUnauthorized)
+		return
+	}
 	logrus.WithFields(logrus.Fields{
 		middleware.RequestIDKey: requestID,
 	}).Info("Handle Websocket")
+	socketID := uuid.NewString()
 
-	token := c.GetHeader("Authorization")
-	if token == "" {
+	if err := h.redisCon.Set(c, "socket:"+userID, socketID, 0).Err(); err != nil {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestID,
-		}).Error("Token is empty")
-		c.Status(http.StatusUnauthorized)
+		}).Error(fmt.Sprintf("error setting socket for redis: %v", err))
+		c.Status(http.StatusInternalServerError)
 		return
 	}
-	userId, err := jwt.ParseJWT(token)
+	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		c.Status(http.StatusUnauthorized)
 		logrus.WithFields(logrus.Fields{
-			"requestID": requestID,
-		}).Errorf("Invalid token: %v", err)
+			middleware.RequestIDKey: requestID,
+		}).Error(fmt.Sprintf("error upgrading connection: %v", err))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"userId": userId,
-	})
+	defer conn.Close()
+	h.connections[socketID] = conn
 
+	logrus.WithFields(logrus.Fields{
+		"socketID":              socketID,
+		middleware.RequestIDKey: requestID,
+	}).Info(fmt.Sprintf("User %s connected with socketID %s\n", userID, socketID))
+
+	for {
+		messageType, msg, err := conn.ReadMessage()
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"socketID":              socketID,
+				middleware.RequestIDKey: requestID,
+			}).Error("ReadMessage error:", err)
+			break
+		}
+		logrus.WithFields(logrus.Fields{
+			"socketID":              socketID,
+			middleware.RequestIDKey: requestID,
+		}).Info(string(msg))
+
+		if err := conn.WriteMessage(messageType, []byte("Message received")); err != nil {
+			log.Println("Error sending message:", err)
+			return
+		}
+	}
+	delete(h.connections, socketID)
 }

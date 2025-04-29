@@ -2,26 +2,40 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	_ "gitlab.com/bobr-lord-messenger/gateway/docs" // тут будет документация
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
+	"net/http"
 )
 
 type Handler struct {
-	service *service.Service
+	service     *service.Service
+	upgrader    *websocket.Upgrader
+	connections map[string]*websocket.Conn
+	redisCon    *redis.Client
 }
 
-func NewHandler(srv *service.Service) *Handler {
+func NewHandler(srv *service.Service, redisConn *redis.Client) *Handler {
 	return &Handler{
-		service: srv,
+		service:     srv,
+		connections: make(map[string]*websocket.Conn),
+		redisCon:    redisConn,
+		upgrader: &websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true // разрешаем все соединения, для разработки ок
+			},
+		},
 	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.RequestMiddleware())
+	r.Use(middleware.AuthMiddleware())
 	r.GET("/ws", h.Websocket)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	auth := r.Group("/auth")

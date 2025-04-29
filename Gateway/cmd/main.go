@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
 	hand "gitlab.com/bobr-lord-messenger/gateway/internal/handler"
@@ -35,9 +36,11 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Failed to load keys: %v", err)
 	}
+	redisConn := initRedis()
+
 	repo := repository.NewRepository()
 	srvc := service.NewService(repo)
-	handler := hand.NewHandler(srvc)
+	handler := hand.NewHandler(srvc, redisConn)
 	srvr := server.NewServer()
 	srvr.Run(cfg, handler.InitRoutes())
 
@@ -47,4 +50,10 @@ func main() {
 	logrus.Info("Shutting down server...")
 	srvr.Shutdown()
 	logrus.Info("Server shut down.")
+}
+
+func initRedis() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
 }
