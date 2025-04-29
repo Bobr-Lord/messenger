@@ -7,10 +7,15 @@ import (
 )
 
 type Config struct {
-	ServerHost     string `env:"SERVER_HOST"`
-	ServerPort     string `env:"SERVER_PORT"`
-	PublicKeyPath  string `env:"PUBLIC_KEY_PATH"`
-	PrivateKeyPath string `env:"PRIVATE_KEY_PATH"`
+	ServerHost     string `env:"SERVER_HOST" required:"true"`
+	ServerPort     string `env:"SERVER_PORT" required:"true"`
+	PublicKeyPath  string `env:"PUBLIC_KEY_PATH" required:"true"`
+	PrivateKeyPath string `env:"PRIVATE_KEY_PATH" required:"true"`
+	PostgresUser   string `env:"POSTGRES_USER" required:"true"`
+	PostgresPass   string `env:"POSTGRES_PASSWORD" required:"true"`
+	PostgresHost   string `env:"POSTGRES_HOST" required:"true"`
+	PostgresPort   string `env:"POSTGRES_PORT" required:"true"`
+	PostgresDBName string `env:"POSTGRES_DB_NAME" required:"true"`
 }
 
 func NewConfig() (*Config, error) {

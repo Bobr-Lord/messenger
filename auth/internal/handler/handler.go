@@ -1,12 +1,18 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"gitlab.com/bobr-lord-messenger/auth/internal/service"
+)
 
 type Handler struct {
+	srv *service.Service
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(srv *service.Service) *Handler {
+	return &Handler{
+		srv: srv,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {

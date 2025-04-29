@@ -6,7 +6,9 @@ import (
 	"gitlab.com/bobr-lord-messenger/auth/internal/config"
 	hand "gitlab.com/bobr-lord-messenger/auth/internal/handler"
 	"gitlab.com/bobr-lord-messenger/auth/internal/jwtutil"
+	"gitlab.com/bobr-lord-messenger/auth/internal/repository"
 	"gitlab.com/bobr-lord-messenger/auth/internal/server"
+	"gitlab.com/bobr-lord-messenger/auth/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,7 +25,13 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	handler := hand.NewHandler()
+	db, err := repository.NewPostgres(cfg)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	repo := repository.NewRepository(db)
+	srvc := service.NewService(repo)
+	handler := hand.NewHandler(srvc)
 	srvr := server.NewServer()
 
 	srvr.Run(cfg, handler)
