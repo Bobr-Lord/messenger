@@ -7,6 +7,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	_ "gitlab.com/bobr-lord-messenger/gateway/docs" // тут будет документация
+	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
 	"net/http"
@@ -17,9 +18,10 @@ type Handler struct {
 	upgrader    *websocket.Upgrader
 	connections map[string]*websocket.Conn
 	redisCon    *redis.Client
+	cfg         *config.Config
 }
 
-func NewHandler(srv *service.Service, redisConn *redis.Client) *Handler {
+func NewHandler(srv *service.Service, redisConn *redis.Client, cfg *config.Config) *Handler {
 	return &Handler{
 		service:     srv,
 		connections: make(map[string]*websocket.Conn),
@@ -29,13 +31,13 @@ func NewHandler(srv *service.Service, redisConn *redis.Client) *Handler {
 				return true // разрешаем все соединения, для разработки ок
 			},
 		},
+		cfg: cfg,
 	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.RequestMiddleware())
-	r.Use(middleware.AuthMiddleware())
 	r.GET("/ws", h.Websocket)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	auth := r.Group("/auth")
@@ -45,6 +47,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	}
 	user := r.Group("/user")
 	{
+		user.Use(middleware.AuthMiddleware())
 		user.GET("/me", h.GetMe)
 		user.PUT("/me", h.UpdateMe)
 		user.GET("/users", h.GetUsers)
@@ -56,6 +59,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	chat := r.Group("/chat")
 	{
+		chat.Use(middleware.AuthMiddleware())
 		chat.POST("/", h.CreateChat)
 		chat.GET("/", h.GetChats)
 		chat.GET("/:id", h.GetMessagesFromChat)
@@ -63,6 +67,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	message := r.Group("/message")
 	{
+		message.Use(middleware.AuthMiddleware())
 		message.PUT("/upd", h.UpdateMessageStatus)
 		message.GET("/:id", h.GetUnsentMessages)
 	}

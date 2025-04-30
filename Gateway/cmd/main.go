@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // @title Messenger API
@@ -38,18 +40,26 @@ func main() {
 	}
 	redisConn := initRedis()
 
-	repo := repository.NewRepository()
+	repo := repository.NewRepository(cfg)
 	srvc := service.NewService(repo)
-	handler := hand.NewHandler(srvc, redisConn)
+	handler := hand.NewHandler(srvc, redisConn, cfg)
 	srvr := server.NewServer()
 	srvr.Run(cfg, handler.InitRoutes())
 
 	wait := make(chan os.Signal, 1)
 	signal.Notify(wait, syscall.SIGINT, syscall.SIGTERM)
 	<-wait
+
 	logrus.Info("Shutting down server...")
-	srvr.Shutdown()
-	logrus.Info("Server shut down.")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srvr.Shutdown(ctx); err != nil {
+		logrus.Errorf("Server shutdown error: %v", err)
+	} else {
+		logrus.Info("Server shutdown complete.")
+	}
 }
 
 func initRedis() *redis.Client {

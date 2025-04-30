@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  models.LoginInput:
+  models.LoginRequest:
     properties:
       password:
         type: string
@@ -10,9 +10,9 @@ definitions:
     - password
     - username
     type: object
-  models.LoginOutput:
+  models.LoginResponse:
     type: object
-  models.RegisterInput:
+  models.RegisterRequest:
     properties:
       email:
         type: string
@@ -25,7 +25,10 @@ definitions:
     - password
     - username
     type: object
-  models.RegisterOutput:
+  models.RegisterResponse:
+    properties:
+      id:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -45,14 +48,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/models.LoginInput'
+          $ref: '#/definitions/models.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.LoginOutput'
+            $ref: '#/definitions/models.LoginResponse'
       security:
       - BearerAuth: []
       summary: Login
@@ -69,14 +72,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/models.RegisterInput'
+          $ref: '#/definitions/models.RegisterRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.RegisterOutput'
+            $ref: '#/definitions/models.RegisterResponse'
       summary: Регистрация нового пользователя
       tags:
       - auth

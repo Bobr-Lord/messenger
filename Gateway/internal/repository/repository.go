@@ -1,8 +1,20 @@
 package repository
 
-type Repository struct {
+import (
+	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/models"
+)
+
+type Auth interface {
+	Register(req *models.RegisterRequest) (*models.RegisterResponse, error)
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+type Repository struct {
+	Auth Auth
+}
+
+func NewRepository(cfg *config.Config) *Repository {
+	return &Repository{
+		Auth: NewAuthRepository(cfg),
+	}
 }

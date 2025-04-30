@@ -8,9 +8,11 @@ import (
 )
 
 type Config struct {
-	ServerHost    string `env:"SERVER_HOST" envDefault:"0.0.0.0"`
-	ServerPort    string `env:"SERVER_PORT"`
-	PublicKeyPath string `env:"PUBLIC_KEY_PATH"  envDefault:"keys/public.pem"`
+	ServerHost      string `env:"SERVER_HOST" envDefault:"0.0.0.0"`
+	ServerPort      string `env:"SERVER_PORT" required:"true"`
+	PublicKeyPath   string `env:"PUBLIC_KEY_PATH" required:"true"`
+	AuthServiceHost string `env:"AUTH_SERVICE_HOST" required:"true"`
+	AuthServicePort string `env:"AUTH_SERVICE_PORT" required:"true"`
 }
 
 func NewConfig() (*Config, error) {

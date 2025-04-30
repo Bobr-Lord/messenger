@@ -1,0 +1,53 @@
+package repository
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
+	customErr "gitlab.com/bobr-lord-messenger/gateway/internal/errors"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/models"
+	"io"
+	"net/http"
+)
+
+type AuthRepository struct {
+	cfg *config.Config
+}
+
+func NewAuthRepository(cfg *config.Config) *AuthRepository {
+	return &AuthRepository{
+		cfg: cfg,
+	}
+}
+
+func (r *AuthRepository) Register(req *models.RegisterRequest) (*models.RegisterResponse, error) {
+	jsReq, err := json.Marshal(req)
+	if err != nil {
+		return nil, customErr.NewCustomError(500, fmt.Sprintf("could not marshal auth request: %v", err))
+	}
+	res, err := http.Post("http://"+r.cfg.AuthServiceHost+":"+r.cfg.AuthServicePort+"/auth/register", "application/json", bytes.NewBuffer(jsReq))
+	if err != nil {
+		return nil, customErr.NewCustomError(500, fmt.Sprintf("could not register auth request: %v", err))
+	}
+	defer res.Body.Close()
+
+	resp, err := io.ReadAll(res.Request.Body)
+	if err != nil {
+		return nil, customErr.NewCustomError(500, fmt.Sprintf("could not read response body: %v", err))
+	}
+
+	if res.StatusCode == http.StatusConflict {
+		return nil, customErr.NewCustomError(res.StatusCode, "already exists")
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, customErr.NewCustomError(res.StatusCode, fmt.Sprintf("could not register auth request: %v", err))
+	}
+
+	var jsResp models.RegisterResponse
+	err = json.Unmarshal(resp, &jsResp)
+	if err != nil {
+		return nil, customErr.NewCustomError(500, fmt.Sprintf("could not marshal auth response: %v", err))
+	}
+	return &jsResp, nil
+}

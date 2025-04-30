@@ -34,7 +34,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.LoginInput"
+                            "$ref": "#/definitions/models.LoginRequest"
                         }
                     }
                 ],
@@ -42,7 +42,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.LoginOutput"
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     }
                 }
@@ -68,7 +68,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterInput"
+                            "$ref": "#/definitions/models.RegisterRequest"
                         }
                     }
                 ],
@@ -76,7 +76,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterOutput"
+                            "$ref": "#/definitions/models.RegisterResponse"
                         }
                     }
                 }
@@ -99,7 +99,7 @@
         }
     },
     "definitions": {
-        "models.LoginInput": {
+        "models.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -114,10 +114,10 @@
                 }
             }
         },
-        "models.LoginOutput": {
+        "models.LoginResponse": {
             "type": "object"
         },
-        "models.RegisterInput": {
+        "models.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -136,8 +136,13 @@
                 }
             }
         },
-        "models.RegisterOutput": {
-            "type": "object"
+        "models.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

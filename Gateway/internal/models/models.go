@@ -1,20 +1,21 @@
 package models
 
-type RegisterInput struct {
+type RegisterRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Email    string `json:"email" binding:"required"`
 }
 
-type RegisterOutput struct {
+type RegisterResponse struct {
+	ID string `json:"id"`
 }
 
-type LoginInput struct {
+type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
-type LoginOutput struct {
+type LoginResponse struct {
 	jwt string `json:"jwt"`
 }
 

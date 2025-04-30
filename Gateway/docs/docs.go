@@ -40,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.LoginInput"
+                            "$ref": "#/definitions/models.LoginRequest"
                         }
                     }
                 ],
@@ -48,7 +48,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.LoginOutput"
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     }
                 }
@@ -74,7 +74,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterInput"
+                            "$ref": "#/definitions/models.RegisterRequest"
                         }
                     }
                 ],
@@ -82,7 +82,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterOutput"
+                            "$ref": "#/definitions/models.RegisterResponse"
                         }
                     }
                 }
@@ -105,7 +105,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.LoginInput": {
+        "models.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -120,10 +120,10 @@ const docTemplate = `{
                 }
             }
         },
-        "models.LoginOutput": {
+        "models.LoginResponse": {
             "type": "object"
         },
-        "models.RegisterInput": {
+        "models.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -142,8 +142,13 @@ const docTemplate = `{
                 }
             }
         },
-        "models.RegisterOutput": {
-            "type": "object"
+        "models.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
