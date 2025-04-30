@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/auth/internal/config"
@@ -9,9 +10,11 @@ import (
 	"gitlab.com/bobr-lord-messenger/auth/internal/repository"
 	"gitlab.com/bobr-lord-messenger/auth/internal/server"
 	"gitlab.com/bobr-lord-messenger/auth/internal/service"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -34,12 +37,30 @@ func main() {
 	handler := hand.NewHandler(srvc)
 	srvr := server.NewServer()
 
-	srvr.Run(cfg, handler)
+	go func() {
+		if err := srvr.Run(cfg, handler); err != nil && err != http.ErrServerClosed {
+			logrus.Fatalf("Error starting server: %v", err)
+		}
+	}()
 
 	wait := make(chan os.Signal, 1)
 	signal.Notify(wait, syscall.SIGINT, syscall.SIGTERM)
 	<-wait
+
 	logrus.Info("Shutting down server...")
-	srvr.Shutdown()
-	logrus.Info("Server shut down.")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srvr.Shutdown(ctx); err != nil {
+		logrus.Errorf("Server shutdown error: %v", err)
+	} else {
+		logrus.Info("Server shutdown complete.")
+	}
+
+	if err := db.DB.Close(); err != nil {
+		logrus.Errorf("Database close error: %v", err)
+	} else {
+		logrus.Info("Database connection closed.")
+	}
 }

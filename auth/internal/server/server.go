@@ -27,6 +27,6 @@ func (s *Server) Run(cfg *config.Config, handler *handler.Handler) error {
 	return s.httpServer.ListenAndServe()
 }
 
-func (s *Server) Shutdown() error {
-	return s.httpServer.Shutdown(context.Background())
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
