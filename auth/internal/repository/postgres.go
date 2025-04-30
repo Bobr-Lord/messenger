@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const UserTableName = "users"
+
 func NewPostgres(cfg *config.Config) (*sqlx.DB, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.PostgresUser, cfg.PostgresPass, cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresDBName)

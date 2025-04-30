@@ -19,8 +19,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.New()
 	auth := r.Group("/auth")
 	{
-		auth.POST("register", func(ctx *gin.Context) {})
-		auth.POST("login", func(ctx *gin.Context) {})
+		auth.POST("/register", h.Register)
+		auth.POST("/login", h.Login)
 	}
 	return r
 }

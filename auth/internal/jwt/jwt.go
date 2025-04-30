@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func CreateJWT(userID int) (string, error) {
+func CreateJWT(userID string) (string, error) {
 	key, err := jwtutil.GetPrivateKey()
 	if err != nil {
 		return "", fmt.Errorf("Error creating JWT key: %v", err)
