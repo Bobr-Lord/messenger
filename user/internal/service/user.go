@@ -28,3 +28,7 @@ func (s *UserService) UpdateMe(id string, req *models.UpdateMeRequest) error {
 	}
 	return s.repo.User.UpdateMe(id, req)
 }
+
+func (s *UserService) GetUsers() (*models.GetUsersResponse, error) {
+	return s.repo.User.GetUsers()
+}

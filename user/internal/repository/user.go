@@ -19,10 +19,10 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 	}
 }
 
-func (h *UserRepository) GetMe(id string) (*models.GetMeResponse, error) {
+func (r *UserRepository) GetMe(id string) (*models.GetMeResponse, error) {
 	query := "SELECT id, username, password_hash, email, created_at, updated_at FROM users WHERE id = $1"
 	var user models.GetMeResponse
-	err := h.db.QueryRow(query, id).Scan(
+	err := r.db.QueryRow(query, id).Scan(
 		&user.ID,
 		&user.Username,
 		&user.Password,
@@ -37,7 +37,7 @@ func (h *UserRepository) GetMe(id string) (*models.GetMeResponse, error) {
 	return &user, nil
 }
 
-func (h *UserRepository) UpdateMe(id string, req *models.UpdateMeRequest) error {
+func (r *UserRepository) UpdateMe(id string, req *models.UpdateMeRequest) error {
 	setParts := []string{}
 	args := []interface{}{}
 	argIdx := 1
@@ -65,10 +65,23 @@ func (h *UserRepository) UpdateMe(id string, req *models.UpdateMeRequest) error 
 	query := fmt.Sprintf("UPDATE users SET %s WHERE id = $%d", strings.Join(setParts, ", "), argIdx)
 	args = append(args, id)
 
-	_, err := h.db.Exec(query, args...)
+	_, err := r.db.Exec(query, args...)
 	if err != nil {
 		return errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("failed to update user: %s", err))
 	}
 
 	return nil
+}
+
+func (r *UserRepository) GetUsers() (*models.GetUsersResponse, error) {
+	var users []*models.UserForGetUsers
+	query := "SELECT id, username, email, created_at, updated_at FROM users"
+	err := r.db.Select(&users, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.GetUsersResponse{
+		users,
+	}, nil
 }
