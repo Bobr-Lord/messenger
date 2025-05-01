@@ -7,6 +7,7 @@ import (
 
 type User interface {
 	GetMe(id string) (*models.GetMeResponse, error)
+	UpdateMe(id string, req *models.UpdateMeRequest) error
 }
 
 type Contacts interface {
