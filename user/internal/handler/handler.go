@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.com/bobr-lord-messenger/user/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/user/internal/service"
 )
 
@@ -17,6 +18,7 @@ func NewHandler(svc *service.Service) *Handler {
 
 func (h *Handler) InitRouter() *gin.Engine {
 	r := gin.New()
+	r.Use(middleware.LoggerMiddleware())
 	r.GET("/me", h.GetMe)
 	r.PUT("/me", h.UpdateMe)
 	r.GET("/users", h.GetUsers)

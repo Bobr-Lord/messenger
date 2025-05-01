@@ -1,8 +1,12 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"gitlab.com/bobr-lord-messenger/user/internal/models"
+)
 
 type User interface {
+	GetMe(id string) (*models.GetMeResponse, error)
 }
 
 type Contacts interface {

@@ -1,8 +1,12 @@
 package service
 
-import "gitlab.com/bobr-lord-messenger/user/internal/repository"
+import (
+	"gitlab.com/bobr-lord-messenger/user/internal/models"
+	"gitlab.com/bobr-lord-messenger/user/internal/repository"
+)
 
 type User interface {
+	GetMe(id string) (*models.GetMeResponse, error)
 }
 
 type Contacts interface {
