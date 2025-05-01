@@ -22,11 +22,6 @@ func (h *Handler) InitRouter() *gin.Engine {
 	r.GET("/me", h.GetMe)
 	r.PUT("/me", h.UpdateMe)
 	r.GET("/users", h.GetUsers)
-	contacts := r.Group("/contacts")
-	{
-		contacts.GET("/", h.GetContacts)
-		contacts.POST("/add", h.AddContact)
-	}
 	user := r.Group("/user")
 	{
 		user.GET("/id", h.GetUserById)

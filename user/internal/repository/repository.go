@@ -13,17 +13,12 @@ type User interface {
 	GetUserByUsername(req *models.GetUserByUsernameRequest) (*models.GetUserByUsernameResponse, error)
 }
 
-type Contacts interface {
-}
-
 type Repository struct {
-	User     User
-	Contacts Contacts
+	User User
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		User:     NewUserRepository(db),
-		Contacts: NewContactRepository(db),
+		User: NewUserRepository(db),
 	}
 }

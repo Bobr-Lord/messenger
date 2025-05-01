@@ -13,16 +13,12 @@ type User interface {
 	GetUserByUsername(req *models.GetUserByUsernameRequest) (*models.GetUserByUsernameResponse, error)
 }
 
-type Contacts interface {
-}
 type Service struct {
-	User     User
-	Contacts Contacts
+	User User
 }
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
-		User:     NewUserService(repo),
-		Contacts: NewContactsService(repo),
+		User: NewUserService(repo),
 	}
 }

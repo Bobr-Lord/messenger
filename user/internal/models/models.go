@@ -59,3 +59,21 @@ type GetUserByUsernameResponse struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
+
+type AddContactRequest struct {
+	ID string `json:"id"`
+}
+type AddContactResponse struct {
+}
+
+type GetContactsRequest struct {
+}
+
+type GetContactsResponse struct {
+	Contacts []*Contact
+}
+type Contact struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
