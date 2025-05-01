@@ -1,0 +1,35 @@
+package handler
+
+import (
+	"github.com/gin-gonic/gin"
+	"gitlab.com/bobr-lord-messenger/user/internal/service"
+)
+
+type Handler struct {
+	svc *service.Service
+}
+
+func NewHandler(svc *service.Service) *Handler {
+	return &Handler{
+		svc: svc,
+	}
+}
+
+func (h *Handler) InitRouter() *gin.Engine {
+	r := gin.New()
+	r.GET("/me", h.GetMe)
+	r.PUT("/me", h.UpdateMe)
+	r.GET("/users", h.GetUsers)
+	contacts := r.Group("/contacts")
+	{
+		contacts.GET("/", h.GetContacts)
+		contacts.POST("/add", h.AddContact)
+	}
+	user := r.Group("/user")
+	{
+		user.GET("/id", h.GetUserById)
+		user.GET("/name", h.GetUserByName)
+	}
+
+	return r
+}
