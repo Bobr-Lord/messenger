@@ -23,10 +23,9 @@ RUN useradd -m appuser
 # Копируем бинарник из предыдущего этапа
 COPY --from=builder /app/main /main
 COPY keys /app/keys
-COPY migrations /migrations
 
 # Меняем владельца файлов, чтобы appuser имел доступ
-RUN chown -R appuser:appuser /app/keys /migrations
+RUN chown -R appuser:appuser /app/keys
 
 # Меняем пользователя
 USER appuser
