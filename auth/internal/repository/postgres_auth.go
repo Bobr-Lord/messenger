@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"gitlab.com/bobr-lord-messenger/auth/internal/errors"
+	"gitlab.com/bobr-lord-messenger/auth/internal/hash"
 	"gitlab.com/bobr-lord-messenger/auth/internal/models"
 	"net/http"
 )
@@ -39,11 +40,15 @@ func (r *PostgresAuthRepository) Register(req *models.RegisterRequest) (string, 
 }
 
 func (r *PostgresAuthRepository) Login(req *models.LoginRequest) (string, error) {
-	query := "SELECT id FROM users WHERE username = $1 AND password_hash = $2"
-	var id string
-	err := r.db.QueryRow(query, req.Username, req.Password).Scan(&id)
+	query := "SELECT id, password_hash FROM users WHERE username = $1"
+	var id, passHash string
+	err := r.db.QueryRow(query, req.Username).Scan(&id, &passHash)
 	if err != nil {
 		return "", errors.NewHttpError(http.StatusInternalServerError, err.Error())
+	}
+	ok := hash.VerifyPass(req.Password, passHash)
+	if !ok {
+		return "", errors.NewHttpError(http.StatusUnauthorized, "invalid password")
 	}
 	return id, err
 }

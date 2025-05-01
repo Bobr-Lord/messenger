@@ -2,6 +2,7 @@ package service
 
 import (
 	customErr "gitlab.com/bobr-lord-messenger/auth/internal/errors"
+	"gitlab.com/bobr-lord-messenger/auth/internal/hash"
 	"gitlab.com/bobr-lord-messenger/auth/internal/jwt"
 	"gitlab.com/bobr-lord-messenger/auth/internal/models"
 	"gitlab.com/bobr-lord-messenger/auth/internal/repository"
@@ -17,6 +18,11 @@ func NewAuthService(repo *repository.Repository) *AuthService {
 }
 
 func (s *AuthService) Register(req *models.RegisterRequest) (string, error) {
+	hashPass, err := hash.HashPass(req.Password)
+	if err != nil {
+		return "", err
+	}
+	req.Password = hashPass
 	id, err := s.repo.PostgresAuth.Register(req)
 	if err != nil {
 		return "", err

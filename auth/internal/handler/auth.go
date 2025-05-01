@@ -75,6 +75,6 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 	logrus.WithFields(logrus.Fields{
 		middleware.RequestIdKey: requestId,
-	}).Infoln("Successfully login")
+	}).Infof("Successfully login, response: %+v", token)
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
