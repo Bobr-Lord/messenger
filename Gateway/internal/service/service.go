@@ -7,6 +7,7 @@ import (
 
 type Auth interface {
 	Register(req *models.RegisterRequest) (*models.RegisterResponse, error)
+	Login(req *models.LoginRequest) (*models.LoginResponse, error)
 }
 
 type Service struct {

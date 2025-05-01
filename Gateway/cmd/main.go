@@ -31,14 +31,13 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.Info(cfg)
 
 	err = jwtutil.LoadKeys("", cfg.PublicKeyPath)
 	if err != nil {
 		logrus.Fatalf("Failed to load keys: %v", err)
 	}
-	redisConn := initRedis()
+	redisConn := initRedis(cfg)
 
 	repo := repository.NewRepository(cfg)
 	srvc := service.NewService(repo)
@@ -62,8 +61,8 @@ func main() {
 	}
 }
 
-func initRedis() *redis.Client {
+func initRedis(cfg *config.Config) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: cfg.RedisHost + ":" + cfg.RedisPort,
 	})
 }

@@ -16,3 +16,7 @@ func NewAuthService(repo *repository.Repository) *AuthService {
 func (s *AuthService) Register(req *models.RegisterRequest) (*models.RegisterResponse, error) {
 	return s.repo.Auth.Register(req)
 }
+
+func (s *AuthService) Login(req *models.LoginRequest) (*models.LoginResponse, error) {
+	return s.repo.Auth.Login(req)
+}

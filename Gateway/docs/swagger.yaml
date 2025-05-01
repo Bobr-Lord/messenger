@@ -11,6 +11,9 @@ definitions:
     - username
     type: object
   models.LoginResponse:
+    properties:
+      token:
+        type: string
     type: object
   models.RegisterRequest:
     properties:

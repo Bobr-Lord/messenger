@@ -16,7 +16,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	jwt string `json:"jwt"`
+	Token string `json:"token"`
 }
 
 type WSInput struct {

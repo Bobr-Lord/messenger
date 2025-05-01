@@ -121,7 +121,12 @@ const docTemplate = `{
             }
         },
         "models.LoginResponse": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
         },
         "models.RegisterRequest": {
             "type": "object",

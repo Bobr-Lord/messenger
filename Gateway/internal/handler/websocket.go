@@ -78,4 +78,5 @@ func (h *Handler) Websocket(c *gin.Context) {
 		}
 	}
 	delete(h.connections, socketID)
+	h.redisCon.Del(c, "socket:"+socketID)
 }
