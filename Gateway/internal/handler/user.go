@@ -88,7 +88,37 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 }
 
 func (h *Handler) GetUsers(c *gin.Context) {
-	c.Status(200)
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Info("handler.GetUsers")
+	id, ok := c.Get(middleware.UserIDKey)
+	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Error("handler.GetUsers: failed to get user id")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to get user id",
+		})
+		return
+	}
+	res, err := h.service.User.GetUsers(id.(string))
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("error getting user: %v", err)
+		code, msg := customErr.ParseCustomError(err)
+		c.AbortWithStatusJSON(code, gin.H{
+			"error": msg,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"users": res,
+	})
 }
 
 func (h *Handler) AddContacts(c *gin.Context) {

@@ -20,3 +20,7 @@ func (s *UserService) GetMe(id string) (*models.GetMeResponse, error) {
 func (s *UserService) UpdateMe(id string, req *models.UpdateMeRequest) error {
 	return s.repo.User.UpdateMe(id, req)
 }
+
+func (s *UserService) GetUsers(id string) (*models.GetUsersResponse, error) {
+	return s.repo.User.GetUsers(id)
+}

@@ -75,3 +75,32 @@ func (r *UserRepository) UpdateMe(id string, req *models.UpdateMeRequest) error 
 	}
 	return nil
 }
+
+func (r *UserRepository) GetUsers(id string) (*models.GetUsersResponse, error) {
+	req, err := http.NewRequest("GET", "http://"+r.cfg.UserServiceHost+":"+r.cfg.UserServicePort+"/users", nil)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not create request: %w", err))
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("id", id)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not send request: %w", err))
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not read response: %w", err))
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.NewCustomError(resp.StatusCode, string(body))
+	}
+	var users models.GetUsersResponse
+	err = json.Unmarshal(body, &users)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not unmarshal response: %w", err))
+	}
+	return &users, nil
+}

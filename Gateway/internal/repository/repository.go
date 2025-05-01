@@ -13,6 +13,7 @@ type Auth interface {
 type User interface {
 	GetMe(id string) (*models.GetMeResponse, error)
 	UpdateMe(id string, req *models.UpdateMeRequest) error
+	GetUsers(id string) (*models.GetUsersResponse, error)
 }
 type Repository struct {
 	Auth Auth
