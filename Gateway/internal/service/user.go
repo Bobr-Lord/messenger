@@ -16,3 +16,7 @@ func NewUserService(repo *repository.Repository) *UserService {
 func (s *UserService) GetMe(id string) (*models.GetMeResponse, error) {
 	return s.repo.User.GetMe(id)
 }
+
+func (s *UserService) UpdateMe(id string, req *models.UpdateMeRequest) error {
+	return s.repo.User.UpdateMe(id, req)
+}

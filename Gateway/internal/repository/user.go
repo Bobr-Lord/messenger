@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
@@ -47,4 +48,30 @@ func (r *UserRepository) GetMe(id string) (*models.GetMeResponse, error) {
 		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not unmarshal response: %w", err))
 	}
 	return &user, nil
+}
+
+func (r *UserRepository) UpdateMe(id string, req *models.UpdateMeRequest) error {
+	jsReq, err := json.Marshal(req)
+	if err != nil {
+		return errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not marshal request: %w", err))
+	}
+	request, err := http.NewRequest("PUT", "http://"+r.cfg.UserServiceHost+":"+r.cfg.UserServicePort+"/me", bytes.NewBuffer(jsReq))
+	if err != nil {
+		return errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not create request: %w", err))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("id", id)
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not send request: %w", err))
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not read response: %w", err))
+	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.NewCustomError(resp.StatusCode, string(body))
+	}
+	return nil
 }

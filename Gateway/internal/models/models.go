@@ -32,5 +32,12 @@ type GetMeResponse struct {
 	UpdateAt time.Time `json:"update_at"`
 }
 
+type UpdateMeRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+type UpdateMeResponse struct{}
+
 type WSInput struct {
 }
