@@ -35,3 +35,27 @@ type UserForGetUsers struct {
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
+
+type GetUserByIDRequest struct {
+	ID string `db:"id" json:"id"`
+}
+type GetUserByIDResponse struct {
+	ID        string    `json:"id" db:"id"`
+	Username  string    `json:"username" db:"username"`
+	Email     string    `json:"email" db:"email"`
+	Password  string    `json:"password" db:"password_hash"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+type GetUserByUsernameRequest struct {
+	Username string `db:"username" json:"username"`
+}
+type GetUserByUsernameResponse struct {
+	ID        string    `json:"id" db:"id"`
+	Username  string    `json:"username" db:"username"`
+	Email     string    `json:"email" db:"email"`
+	Password  string    `json:"password" db:"password_hash"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}

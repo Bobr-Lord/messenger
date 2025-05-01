@@ -85,3 +85,37 @@ func (r *UserRepository) GetUsers() (*models.GetUsersResponse, error) {
 		users,
 	}, nil
 }
+
+func (r *UserRepository) GetUserByID(req *models.GetUserByIDRequest) (*models.GetUserByIDResponse, error) {
+	query := "SELECT * FROM users WHERE id = $1"
+	var res models.GetUserByIDResponse
+	err := r.db.QueryRow(query, req.ID).Scan(
+		&res.ID,
+		&res.Username,
+		&res.Email,
+		&res.Password,
+		&res.CreatedAt,
+		&res.UpdatedAt,
+	)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusNotFound, fmt.Sprintf("user not found: %s", err))
+	}
+	return &res, nil
+}
+
+func (r *UserRepository) GetUserByUsername(req *models.GetUserByUsernameRequest) (*models.GetUserByUsernameResponse, error) {
+	query := "SELECT * FROM users WHERE username = $1"
+	var res models.GetUserByUsernameResponse
+	err := r.db.QueryRow(query, req.Username).Scan(
+		&res.ID,
+		&res.Username,
+		&res.Email,
+		&res.Password,
+		&res.CreatedAt,
+		&res.UpdatedAt,
+	)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusNotFound, fmt.Sprintf("user not found: %s", err))
+	}
+	return &res, nil
+}

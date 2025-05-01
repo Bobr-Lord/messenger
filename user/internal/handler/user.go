@@ -106,9 +106,55 @@ func (h *Handler) GetUsers(c *gin.Context) {
 }
 
 func (h *Handler) GetUserById(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+	requestId, ok := c.Get(middleware.RequestID)
+	if !ok {
+		requestId = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		middleware.RequestID: requestId,
+	}).Info("GetUserById")
+	var req models.GetUserByIDRequest
+	if err := c.BindJSON(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			middleware.RequestID: requestId,
+		}).Info("err: " + err.Error())
+		code, msg := errors.ParseCustomError(err)
+		c.JSON(code, gin.H{"error": msg})
+	}
+	res, err := h.svc.User.GetUserByID(&req)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			middleware.RequestID: requestId,
+		}).Info("err: " + err.Error())
+		code, msg := errors.ParseCustomError(err)
+		c.JSON(code, gin.H{"error": msg})
+	}
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) GetUserByName(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+	requestId, ok := c.Get(middleware.RequestID)
+	if !ok {
+		requestId = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		middleware.RequestID: requestId,
+	}).Info("GetUserById")
+	var req models.GetUserByUsernameRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			middleware.RequestID: requestId,
+		}).Info("err: " + err.Error())
+		code, msg := errors.ParseCustomError(err)
+		c.JSON(code, gin.H{"error": msg})
+	}
+	res, err := h.svc.User.GetUserByUsername(&req)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			middleware.RequestID: requestId,
+		}).Info("err: " + err.Error())
+		code, msg := errors.ParseCustomError(err)
+		c.JSON(code, gin.H{"error": msg})
+	}
+	c.JSON(http.StatusOK, res)
 }
