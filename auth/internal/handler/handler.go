@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.com/bobr-lord-messenger/auth/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/auth/internal/service"
 )
 
@@ -17,6 +18,7 @@ func NewHandler(srv *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.New()
+	r.Use(middleware.LoggerMiddleware())
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", h.Register)
