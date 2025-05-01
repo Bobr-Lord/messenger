@@ -179,11 +179,3 @@ func (h *Handler) GetUserByUsername(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, res)
 }
-
-func (h *Handler) AddContacts(c *gin.Context) {
-	c.Status(200)
-}
-
-func (h *Handler) GetContacts(c *gin.Context) {
-	c.Status(200)
-}

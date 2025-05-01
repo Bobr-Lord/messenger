@@ -51,8 +51,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		user.GET("/me", h.GetMe)
 		user.PUT("/me", h.UpdateMe)
 		user.GET("/users", h.GetUsers)
-		user.POST("/contacts/add", h.AddContacts)
-		user.GET("/contacts", h.GetContacts)
 		user.GET("/id", h.GetUserByID)
 		user.GET("/name", h.GetUserByUsername)
 	}
