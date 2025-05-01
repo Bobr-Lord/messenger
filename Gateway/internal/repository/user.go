@@ -104,3 +104,63 @@ func (r *UserRepository) GetUsers(id string) (*models.GetUsersResponse, error) {
 	}
 	return &users, nil
 }
+
+func (r *UserRepository) GetUserById(req *models.GetUserByIdRequest) (*models.GetUserByIdResponse, error) {
+	jsReq, err := json.Marshal(req)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not marshal request: %w", err))
+	}
+	request, err := http.NewRequest("GET", "http://"+r.cfg.UserServiceHost+":"+r.cfg.UserServicePort+"/user/id", bytes.NewBuffer(jsReq))
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not create request: %w", err))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not send request: %w", err))
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not read response: %w", err))
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.NewCustomError(resp.StatusCode, string(body))
+	}
+	var user models.GetUserByIdResponse
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not unmarshal response: %w", err))
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) GetUserByUsername(req *models.GetUserByUsernameRequest) (*models.GetUserByUsernameResponse, error) {
+	jsReq, err := json.Marshal(req)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not marshal request: %w", err))
+	}
+	request, err := http.NewRequest("GET", "http://"+r.cfg.UserServiceHost+":"+r.cfg.UserServicePort+"/user/name", bytes.NewBuffer(jsReq))
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not create request: %w", err))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not send request: %w", err))
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not read response: %w", err))
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.NewCustomError(resp.StatusCode, string(body))
+	}
+	var user models.GetUserByUsernameResponse
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not unmarshal response: %w", err))
+	}
+	return &user, nil
+}

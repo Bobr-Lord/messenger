@@ -14,6 +14,8 @@ type User interface {
 	GetMe(id string) (*models.GetMeResponse, error)
 	UpdateMe(id string, req *models.UpdateMeRequest) error
 	GetUsers(id string) (*models.GetUsersResponse, error)
+	GetUserById(req *models.GetUserByIdRequest) (*models.GetUserByIdResponse, error)
+	GetUserByUsername(req *models.GetUserByUsernameRequest) (*models.GetUserByUsernameResponse, error)
 }
 
 type Service struct {

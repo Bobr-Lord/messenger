@@ -24,3 +24,11 @@ func (s *UserService) UpdateMe(id string, req *models.UpdateMeRequest) error {
 func (s *UserService) GetUsers(id string) (*models.GetUsersResponse, error) {
 	return s.repo.User.GetUsers(id)
 }
+
+func (s *UserService) GetUserById(req *models.GetUserByIdRequest) (*models.GetUserByIdResponse, error) {
+	return s.repo.User.GetUserById(req)
+}
+
+func (s *UserService) GetUserByUsername(req *models.GetUserByUsernameRequest) (*models.GetUserByUsernameResponse, error) {
+	return s.repo.User.GetUserByUsername(req)
+}

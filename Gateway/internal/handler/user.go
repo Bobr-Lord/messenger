@@ -41,9 +41,7 @@ func (h *Handler) GetMe(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": res,
-	})
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) UpdateMe(c *gin.Context) {
@@ -116,9 +114,70 @@ func (h *Handler) GetUsers(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"users": res,
-	})
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) GetUserByID(c *gin.Context) {
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Info("handler.GetUserByID")
+	var req models.GetUserByIdRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("error parsing request: %v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "error parsing request",
+		})
+		return
+	}
+	res, err := h.service.User.GetUserById(&req)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		})
+		code, msg := customErr.ParseCustomError(err)
+		c.AbortWithStatusJSON(code, gin.H{
+			"error": msg,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
+func (h *Handler) GetUserByUsername(c *gin.Context) {
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Info("handler.GetUserByUsername")
+	var req models.GetUserByUsernameRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("error parsing request: %v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "error parsing request",
+		})
+		return
+	}
+	res, err := h.service.User.GetUserByUsername(&req)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("error getting user: %v", err)
+		code, msg := customErr.ParseCustomError(err)
+		c.AbortWithStatusJSON(code, gin.H{
+			"error": msg,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) AddContacts(c *gin.Context) {
@@ -126,12 +185,5 @@ func (h *Handler) AddContacts(c *gin.Context) {
 }
 
 func (h *Handler) GetContacts(c *gin.Context) {
-	c.Status(200)
-}
-
-func (h *Handler) GetUserByID(c *gin.Context) {
-	c.Status(200)
-}
-func (h *Handler) GetUserByUsername(c *gin.Context) {
 	c.Status(200)
 }
