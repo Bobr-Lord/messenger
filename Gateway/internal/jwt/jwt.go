@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-func ParseJWT(tokenStr string) (uint, error) {
+func ParseJWT(tokenStr string) (string, error) {
 	parts := strings.SplitN(tokenStr, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return 0, errors.New("invalid token")
+		return "", errors.New("invalid token")
 	}
 	tokenStr = parts[1]
 
@@ -19,18 +19,18 @@ func ParseJWT(tokenStr string) (uint, error) {
 		return jwtutil.GetPublicKey()
 	})
 	if err != nil || !token.Valid {
-		return 0, fmt.Errorf("invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, fmt.Errorf("invalid claims")
+		return "", fmt.Errorf("invalid claims")
 	}
 
-	userID, ok := claims["user_id"].(uint)
+	userID, ok := claims["user_id"]
 	if !ok {
-		return 0, fmt.Errorf("user_id not found in token")
+		return "", fmt.Errorf("user_id not found in token")
 	}
 
-	return userID, nil
+	return userID.(string), nil
 }

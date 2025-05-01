@@ -1,12 +1,71 @@
+version: "3.8"
 
 services:
   redis:
     image: redis:latest
     container_name: redis
+    networks:
+      - app
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    networks:
+      - app
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    networks:
+      - app
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8081
+      PUBLIC_KEY_PATH: /app/keys/public.pem
+      PRIVATE_KEY_PATH: /app/keys/private.pem
+
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB_NAME: postgres
+      APP_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
 volumes:
   redis-data:
+    driver: local
+  pgdata:
+    driver: local
+
+networks:
+  app:
+    driver: bridge

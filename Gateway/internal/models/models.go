@@ -19,5 +19,14 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
+type GetMeRequest struct {
+}
+type GetMeResponse struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
 type WSInput struct {
 }

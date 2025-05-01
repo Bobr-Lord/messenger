@@ -32,7 +32,7 @@ func (h *Handler) Register(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestId,
 		}).Errorf("Invalid register request: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	res, err := h.service.Auth.Register(&req)
@@ -41,7 +41,7 @@ func (h *Handler) Register(c *gin.Context) {
 			middleware.RequestIDKey: requestId,
 		}).Error(err)
 		code, err := errors.ParseCustomError(err)
-		c.JSON(code, gin.H{"error": err})
+		c.AbortWithStatusJSON(code, gin.H{"error": err})
 		return
 	}
 	logrus.WithFields(logrus.Fields{
@@ -73,7 +73,7 @@ func (h *Handler) Login(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestId,
 		}).Errorf("Invalid login request: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	res, err := h.service.Auth.Login(&req)
@@ -82,7 +82,7 @@ func (h *Handler) Login(c *gin.Context) {
 			middleware.RequestIDKey: requestId,
 		}).Error(err)
 		code, err := errors.ParseCustomError(err)
-		c.JSON(code, gin.H{"error": err})
+		c.AbortWithStatusJSON(code, gin.H{"error": err})
 		return
 	}
 	logrus.WithFields(logrus.Fields{

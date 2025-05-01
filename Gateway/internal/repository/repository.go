@@ -10,12 +10,17 @@ type Auth interface {
 	Login(req *models.LoginRequest) (*models.LoginResponse, error)
 }
 
+type User interface {
+	GetMe(id string) (*models.GetMeResponse, error)
+}
 type Repository struct {
 	Auth Auth
+	User User
 }
 
 func NewRepository(cfg *config.Config) *Repository {
 	return &Repository{
 		Auth: NewAuthRepository(cfg),
+		User: NewUserRepository(cfg),
 	}
 }
