@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/user/internal/config"
 	"gitlab.com/bobr-lord-messenger/user/internal/handler"
@@ -20,6 +21,19 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+
+	switch cfg.AppEnv {
+	case "local":
+		logrus.SetFormatter(&logrus.TextFormatter{
+			FullTimestamp: true,
+		})
+		logrus.SetLevel(logrus.DebugLevel)
+	case "production":
+		gin.SetMode(gin.ReleaseMode)
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+		logrus.SetLevel(logrus.InfoLevel)
+	}
+
 	logrus.Infof("%+v", cfg)
 
 	db, err := repository.NewPostgres(cfg)
