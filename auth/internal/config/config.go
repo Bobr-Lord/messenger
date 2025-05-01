@@ -16,6 +16,7 @@ type Config struct {
 	PostgresHost   string `env:"POSTGRES_HOST" required:"true"`
 	PostgresPort   string `env:"POSTGRES_PORT" required:"true"`
 	PostgresDBName string `env:"POSTGRES_DB_NAME" required:"true"`
+	AppEnv         string `env:"APP_ENV" required:"true"`
 }
 
 func NewConfig() (*Config, error) {

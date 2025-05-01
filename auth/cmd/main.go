@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/auth/internal/config"
 	hand "gitlab.com/bobr-lord-messenger/auth/internal/handler"
@@ -22,6 +23,19 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+
+	switch cfg.AppEnv {
+	case "local":
+		logrus.SetFormatter(&logrus.TextFormatter{
+			FullTimestamp: true,
+		})
+		logrus.SetLevel(logrus.DebugLevel)
+	case "production":
+		gin.SetMode(gin.ReleaseMode)
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+		logrus.SetLevel(logrus.InfoLevel)
+	}
+
 	logrus.Info(fmt.Sprintf("%+v", cfg))
 
 	if err := jwtutil.LoadKeys(cfg.PrivateKeyPath, cfg.PublicKeyPath); err != nil {
