@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	_ "github.com/golang-migrate/migrate/database/postgres"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/chat/internal/config"

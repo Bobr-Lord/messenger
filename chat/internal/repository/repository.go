@@ -1,8 +1,12 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"gitlab.com/bobr-lord-messenger/chat/internal/models"
+)
 
 type Chat interface {
+	CreatePrivateChat(userID string, req *models.CreatePrivateChatRequest) (string, error)
 }
 type Repository struct {
 	Chat Chat

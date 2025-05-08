@@ -1,6 +1,9 @@
 package service
 
-import "gitlab.com/bobr-lord-messenger/chat/internal/repository"
+import (
+	"gitlab.com/bobr-lord-messenger/chat/internal/models"
+	"gitlab.com/bobr-lord-messenger/chat/internal/repository"
+)
 
 type ChatService struct {
 	repo *repository.Repository
@@ -8,4 +11,8 @@ type ChatService struct {
 
 func NewChatService(repo *repository.Repository) *ChatService {
 	return &ChatService{repo: repo}
+}
+
+func (s *ChatService) CreatePrivateChat(userID string, req *models.CreatePrivateChatRequest) (string, error) {
+	return s.repo.Chat.CreatePrivateChat(userID, req)
 }
