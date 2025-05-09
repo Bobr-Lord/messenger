@@ -7,6 +7,7 @@ import (
 
 type Chat interface {
 	CreatePrivateChat(userID string, req *models.CreatePrivateChatRequest) (string, error)
+	CreatePublicChat(userID string, req *models.CreatePublicChatRequest) (string, error)
 }
 type Service struct {
 	Chat Chat

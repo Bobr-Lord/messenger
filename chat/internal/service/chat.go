@@ -16,3 +16,7 @@ func NewChatService(repo *repository.Repository) *ChatService {
 func (s *ChatService) CreatePrivateChat(userID string, req *models.CreatePrivateChatRequest) (string, error) {
 	return s.repo.Chat.CreatePrivateChat(userID, req)
 }
+
+func (s *ChatService) CreatePublicChat(userID string, req *models.CreatePublicChatRequest) (string, error) {
+	return s.repo.Chat.CreatePublicChat(userID, req)
+}
