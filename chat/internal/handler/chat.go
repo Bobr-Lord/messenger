@@ -3,11 +3,22 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/bobr-lord-messenger/chat/internal/errors"
 	"gitlab.com/bobr-lord-messenger/chat/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/chat/internal/models"
 	"net/http"
 )
 
+// @Summary Создание Приватного чата
+// @Tags API создание чата
+// @Description Создание приватного чата
+// @ID create-private-chat
+// @Accept  json
+// @Produce  json
+// @Param input body models.CreatePrivateChatRequest true "credentials"
+// @Success 200 {object} models.CreatePrivateChatResponse "data"
+// @Failure default {object} errors.ErrorResponse
+// @Router /chat/private [post]
 func (h *Handler) CreatePrivateChat(c *gin.Context) {
 	requestId, ok := c.Get(middleware.RequestID)
 	if !ok {
@@ -21,7 +32,8 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"request_id": requestId,
 		}).Info("user ID required")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "id is required"})
+		errResp := errors.NewErrorResponse(http.StatusUnauthorized, "id is required")
+		c.JSON(http.StatusUnauthorized, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
@@ -33,7 +45,8 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestId": requestId,
 		}).Infof("invalid request body, %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		errResp := errors.NewErrorResponse(http.StatusBadRequest, "invalid request body")
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
@@ -44,8 +57,9 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestId": requestId,
 		}).Infof("create chat failed, %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "create chat failed"})
-		return
+		errCode, msg := errors.ParseCustomError(err)
+		errResp := errors.NewErrorResponse(errCode, msg)
+		c.JSON(http.StatusInternalServerError, errResp)
 	}
 	logrus.WithFields(logrus.Fields{
 		"requestId": requestId,
@@ -53,6 +67,16 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {
 	c.JSON(http.StatusCreated, res)
 }
 
+// @Summary Создание Группы
+// @Tags API создание чата
+// @Description Создание публичного чата
+// @ID create-public-chat
+// @Accept  json
+// @Produce  json
+// @Param input body models.CreatePublicChatRequest true "credentials"
+// @Success 200 {object} models.CreatePublicChatResponse "data"
+// @Failure default {object} errors.ErrorResponse
+// @Router /chat/public [post]
 func (h *Handler) CreatePublicChat(c *gin.Context) {
 	requestId, ok := c.Get(middleware.RequestID)
 	if !ok {
@@ -67,7 +91,8 @@ func (h *Handler) CreatePublicChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestId": requestId,
 		}).Info("user ID required")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "id is required"})
+		errResp := errors.NewErrorResponse(http.StatusUnauthorized, "id is required")
+		c.JSON(http.StatusUnauthorized, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
@@ -78,7 +103,8 @@ func (h *Handler) CreatePublicChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestId": requestId,
 		}).Infof("invalid request body, %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		errResp := errors.NewErrorResponse(http.StatusBadRequest, "invalid request body")
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
@@ -89,7 +115,8 @@ func (h *Handler) CreatePublicChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestId": requestId,
 		}).Infof("create chat failed, %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "create chat failed"})
+		errResp := errors.NewErrorResponse(http.StatusInternalServerError, "create chat failed")
+		c.JSON(http.StatusInternalServerError, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{

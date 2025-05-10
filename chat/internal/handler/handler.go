@@ -2,6 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "gitlab.com/bobr-lord-messenger/chat/docs"
 	"gitlab.com/bobr-lord-messenger/chat/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/chat/internal/service"
 )
@@ -25,6 +28,7 @@ func (h *Handler) InitRouter() *gin.Engine {
 		chats.GET("/:id", h.GetChatHistory)
 		chats.POST("/add", h.AddChat)
 	}
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return router
 }

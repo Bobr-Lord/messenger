@@ -1,0 +1,99 @@
+basePath: /
+definitions:
+  errors.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  models.CreatePrivateChatRequest:
+    properties:
+      friend_id:
+        type: string
+    type: object
+  models.CreatePrivateChatResponse:
+    properties:
+      chat_id:
+        type: string
+    type: object
+  models.CreatePublicChatRequest:
+    properties:
+      name:
+        type: string
+      participant_id:
+        items:
+          type: string
+        type: array
+    type: object
+  models.CreatePublicChatResponse:
+    properties:
+      chat_id:
+        type: string
+    type: object
+host: localhost:8083
+info:
+  contact: {}
+  title: Сервис Chat
+  version: "1.0"
+paths:
+  /chat/private:
+    post:
+      consumes:
+      - application/json
+      description: Создание приватного чата
+      operationId: create-private-chat
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePrivateChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: data
+          schema:
+            $ref: '#/definitions/models.CreatePrivateChatResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Создание Приватного чата
+      tags:
+      - API создание чата
+  /chat/public:
+    post:
+      consumes:
+      - application/json
+      description: Создание публичного чата
+      operationId: create-public-chat
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePublicChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: data
+          schema:
+            $ref: '#/definitions/models.CreatePublicChatResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Создание Группы
+      tags:
+      - API создание чата
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

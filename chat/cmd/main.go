@@ -16,6 +16,16 @@ import (
 	"time"
 )
 
+// @title Сервис Chat
+// @version 1.0
+// description сервис для создания и получения чатов
+
+// @host localhost:8083
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg, err := config.NewConfig()
 	if err != nil {

@@ -14,7 +14,8 @@ func LoggerMiddleware() gin.HandlerFunc {
 		c.Set(RequestID, requestId)
 		logrus.WithFields(logrus.Fields{
 			RequestID: requestId,
-		}).Info("Request logged in")
+		}).Infof("request url %s", c.Request.RequestURI)
+
 		c.Next()
 	}
 }
