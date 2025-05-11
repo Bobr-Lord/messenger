@@ -8,6 +8,8 @@ import (
 type Chat interface {
 	CreatePrivateChat(userID string, req *models.CreatePrivateChatRequest) (string, error)
 	CreatePublicChat(userID string, req *models.CreatePublicChatRequest) (string, error)
+	GetChats(id string) ([]string, error)
+	GetUsersChat(chatID string) ([]string, error)
 }
 type Repository struct {
 	Chat Chat

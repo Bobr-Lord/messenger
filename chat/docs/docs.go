@@ -15,8 +15,48 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/chat": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Получение чатов пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API получить чаты"
+                ],
+                "summary": "Получить чаты пользователя",
+                "operationId": "get-chats",
+                "responses": {
+                    "200": {
+                        "description": "data",
+                        "schema": {
+                            "$ref": "#/definitions/models.GetChatsResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/chat/private": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создание приватного чата",
                 "consumes": [
                     "application/json"
@@ -58,6 +98,11 @@ const docTemplate = `{
         },
         "/chat/public": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Создание публичного чата",
                 "consumes": [
                     "application/json"
@@ -86,6 +131,40 @@ const docTemplate = `{
                         "description": "data",
                         "schema": {
                             "$ref": "#/definitions/models.CreatePublicChatResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/{chat_id}/users": {
+            "get": {
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Получить участников чата",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID чата",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.GetChatUsersResponse"
+                            }
                         }
                     },
                     "default": {
@@ -147,12 +226,34 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "models.GetChatUsersResponse": {
+            "type": "object",
+            "properties": {
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.GetChatsResponse": {
+            "type": "object",
+            "properties": {
+                "chat_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "id",
             "in": "header"
         }
     }

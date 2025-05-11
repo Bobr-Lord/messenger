@@ -92,3 +92,23 @@ func (h *ChatRepository) CreatePublicChat(userID string, req *models.CreatePubli
 	}
 	return chatID, nil
 }
+
+func (r *ChatRepository) GetChats(id string) ([]string, error) {
+	query := "SELECT chat_id FROM chat_participants WHERE user_id = $1"
+	var chats []string
+	err := r.db.Select(&chats, query, id)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not get chats: %v", err))
+	}
+	return chats, nil
+}
+
+func (r *ChatRepository) GetUsersChat(chatID string) ([]string, error) {
+	query := "SELECT user_id FROM chat_participants WHERE chat_id = $1"
+	var chats []string
+	err := r.db.Select(&chats, query, chatID)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("could not get chats: %v", err))
+	}
+	return chats, nil
+}

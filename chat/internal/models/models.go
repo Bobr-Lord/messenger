@@ -15,12 +15,12 @@ type CreatePublicChatResponse struct {
 	ChatID string `json:"chat_id"`
 }
 
-type GetChatHistoryRequest struct{}
-type GetHistoryResponse struct {
-	Messages []string `json:"messages"`
-}
-
 type GetChatsRequest struct{}
 type GetChatsResponse struct {
 	ChatID []string `json:"chat_id"`
+}
+
+type GetChatUsersRequest struct{}
+type GetChatUsersResponse struct {
+	Users []string `json:"users"`
 }

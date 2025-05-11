@@ -25,7 +25,7 @@ import (
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name Authorization
+// @name id
 func main() {
 	cfg, err := config.NewConfig()
 	if err != nil {

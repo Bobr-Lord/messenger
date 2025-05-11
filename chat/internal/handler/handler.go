@@ -25,8 +25,7 @@ func (h *Handler) InitRouter() *gin.Engine {
 		chats.POST("/private", h.CreatePrivateChat)
 		chats.POST("/public", h.CreatePublicChat)
 		chats.GET("/", h.GetChats)
-		chats.GET("/:id", h.GetChatHistory)
-		chats.POST("/add", h.AddChat)
+		chats.GET("/:chat_id/users", h.GetChatUsers)
 	}
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

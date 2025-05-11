@@ -20,3 +20,11 @@ func (s *ChatService) CreatePrivateChat(userID string, req *models.CreatePrivate
 func (s *ChatService) CreatePublicChat(userID string, req *models.CreatePublicChatRequest) (string, error) {
 	return s.repo.Chat.CreatePublicChat(userID, req)
 }
+
+func (s *ChatService) GetChats(id string) ([]string, error) {
+	return s.repo.Chat.GetChats(id)
+}
+
+func (s *ChatService) GetUsersChat(chatID string) ([]string, error) {
+	return s.repo.Chat.GetUsersChat(chatID)
+}
