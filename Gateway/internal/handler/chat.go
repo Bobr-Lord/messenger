@@ -1,6 +1,13 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	customErr "gitlab.com/bobr-lord-messenger/gateway/internal/errors"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/models"
+	"net/http"
+)
 
 // CreatePrivateChat godoc
 // @Security BearerAuth
@@ -13,7 +20,46 @@ import "github.com/gin-gonic/gin"
 // @Success      200  {object}  models.CreatePrivateChatResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router       /chat/private [post]
-func (h *Handler) CreatePrivateChat(c *gin.Context) {}
+func (h *Handler) CreatePrivateChat(c *gin.Context) {
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Info("CreatePrivateChat")
+	id, ok := c.Get(middleware.UserIDKey)
+	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Error("handler.GetMe: failed to get user id")
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	var req models.CreatePrivateChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("CreatePrivateChat: ShouldBindJSON: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	res, err := h.service.Chat.CreatePrivateChat(id.(string), &req)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("handler.GetMe: CreatePrivateChat error: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Infof("handler.GetMe: CreatePrivateChat: %v", res)
+	c.JSON(http.StatusOK, res)
+}
 
 // CreatePublicChat godoc
 // @Security BearerAuth
@@ -26,7 +72,46 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {}
 // @Success      200  {object}  models.CreatePrivateChatResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router       /chat/public [post]
-func (h *Handler) CreatePublicChat(c *gin.Context) {}
+func (h *Handler) CreatePublicChat(c *gin.Context) {
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Infoln("CreatePublicChat")
+	id, ok := c.Get(middleware.UserIDKey)
+	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Error("handler.GetMe: failed to get user id")
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	var req models.CreatePublicChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("CreatePublicChat: ShouldBindJSON: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	res, err := h.service.Chat.CreatePublicChat(id.(string), &req)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("handler.GetMe: CreatePublicChat error: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Infof("handler.GetMe: CreatePublicChat: %v", res)
+	c.JSON(http.StatusOK, res)
+}
 
 // GetMeChats godoc
 // @Security BearerAuth
@@ -38,7 +123,43 @@ func (h *Handler) CreatePublicChat(c *gin.Context) {}
 // @Success      200  {object}  models.GetMeChatsResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router       /chat [get]
-func (h *Handler) GetMeChats(c *gin.Context) {}
+func (h *Handler) GetMeChats(c *gin.Context) {
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Info("handler.GetMeChats")
+	id, ok := c.Get(middleware.UserIDKey)
+	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Error("handler.GetMeChats: failed to get user id")
+		ErrResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, ErrResp)
+		return
+	}
+	var req models.GetMeChatsRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("handler.GetMeChats: ShouldBindQuery: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	res, err := h.service.Chat.GetMeChats(id.(string))
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("handler.GetMeChats: GetMeChats error: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
 
 // GetChatUsers godoc
 // @Security BearerAuth
@@ -51,4 +172,43 @@ func (h *Handler) GetMeChats(c *gin.Context) {}
 // @Success      200  {object}  models.GetChatUsersResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router       /chat/{chat_id}/users [get]
-func (h *Handler) GetChatUsers(c *gin.Context) {}
+func (h *Handler) GetChatUsers(c *gin.Context) {
+	requestID, ok := c.Get(middleware.RequestIDKey)
+	if !ok {
+		requestID = "unknown"
+	}
+	logrus.WithFields(logrus.Fields{
+		"requestID": requestID,
+	}).Info("handler.GetChatUsers")
+
+	chatID := c.Param("chat_id")
+
+	id, ok := c.Get(middleware.UserIDKey)
+	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Error("handler.GetChatUsers: failed to get user id")
+		ErrResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, ErrResp)
+		return
+	}
+	var req models.GetChatUsersRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("handler.GetChatUsers: ShouldBindQuery: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	res, err := h.service.Chat.GetChatUsers(id.(string), chatID)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"requestID": requestID,
+		}).Errorf("handler.GetChatUsers: GetChatUsers error: %v", err)
+		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		c.JSON(http.StatusOK, errResp)
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
