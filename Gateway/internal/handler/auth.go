@@ -17,6 +17,7 @@ import (
 // @Produce      json
 // @Param        input  body  models.RegisterRequest  true  "Данные регистрации"
 // @Success      200  {object}  models.RegisterResponse
+// @Failure default {object} errors.ErrorResponse
 // @Router       /auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	requestId, ok := c.Get(middleware.RequestIDKey)
@@ -32,7 +33,8 @@ func (h *Handler) Register(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestId,
 		}).Errorf("Invalid register request: %v", err)
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errResp := errors.NewErrorResponse(http.StatusBadRequest, "Invalid register request")
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	res, err := h.service.Auth.Register(&req)
@@ -41,7 +43,8 @@ func (h *Handler) Register(c *gin.Context) {
 			middleware.RequestIDKey: requestId,
 		}).Error(err)
 		code, err := errors.ParseCustomError(err)
-		c.AbortWithStatusJSON(code, gin.H{"error": err})
+		errResp := errors.NewErrorResponse(code, err)
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
@@ -53,12 +56,13 @@ func (h *Handler) Register(c *gin.Context) {
 // Login godoc
 // @Security BearerAuth
 // @Summary      Login
-// @Description  логинит нового пользователя и возвращает JWT токен
+// @Description  авторизация и генерация jwt
 // @Tags         auth
 // @Accept       json
 // @Produce      json
 // @Param        input  body  models.LoginRequest  true  "Данные регистрации"
 // @Success      200  {object}  models.LoginResponse
+// @Failure default {object} errors.ErrorResponse
 // @Router       /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	requestId, ok := c.Get(middleware.RequestIDKey)
@@ -73,16 +77,21 @@ func (h *Handler) Login(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestId,
 		}).Errorf("Invalid login request: %v", err)
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errResp := errors.NewErrorResponse(http.StatusBadRequest, err.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, errResp)
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		middleware.RequestIDKey: requestId,
+	}).Infof("request: %+v", req)
 	res, err := h.service.Auth.Login(&req)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestId,
 		}).Error(err)
 		code, err := errors.ParseCustomError(err)
-		c.AbortWithStatusJSON(code, gin.H{"error": err})
+		errResp := errors.NewErrorResponse(code, err)
+		c.AbortWithStatusJSON(code, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{

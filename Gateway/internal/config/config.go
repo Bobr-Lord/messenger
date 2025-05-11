@@ -15,6 +15,8 @@ type Config struct {
 	AuthServicePort string `env:"AUTH_SERVICE_PORT" required:"true"`
 	UserServiceHost string `env:"USER_SERVICE_HOST" required:"true"`
 	UserServicePort string `env:"USER_SERVICE_PORT" required:"true"`
+	ChatServiceHost string `env:"CHAT_SERVICE_HOST" required:"true"`
+	ChatServicePort string `env:"CHAT_SERVICE_PORT" required:"true"`
 	RedisHost       string `env:"REDIS_HOST" required:"true"`
 	RedisPort       string `env:"REDIS_PORT" required:"true"`
 }
