@@ -58,9 +58,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	chat := r.Group("/chat")
 	{
 		chat.Use(middleware.AuthMiddleware())
-		chat.POST("/", h.CreateChat)
-		chat.GET("/", h.GetChats)
-		chat.GET("/:id", h.GetMessagesFromChat)
+		chat.GET("/", h.GetMeChats)
+		chat.POST("/private", h.CreatePrivateChat)
+		chat.POST("/public", h.CreatePublicChat)
+		chat.GET("/:chat_id/users", h.GetChatUsers)
 	}
 
 	message := r.Group("/message")

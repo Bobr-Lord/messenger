@@ -18,7 +18,7 @@ import (
 
 // @title Messenger API
 // @version 1.0
-// @description Это документация для вашего API
+// @description Gateway для мессанджера
 
 // @host localhost:8080
 // @BasePath /

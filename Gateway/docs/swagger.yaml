@@ -7,6 +7,39 @@ definitions:
       message:
         type: string
     type: object
+  models.CreatePrivateChatRequest:
+    properties:
+      friend_id:
+        type: string
+    type: object
+  models.CreatePrivateChatResponse:
+    properties:
+      chat_id:
+        type: string
+    type: object
+  models.CreatePublicChatRequest:
+    properties:
+      name:
+        type: string
+      participant_id:
+        items:
+          type: string
+        type: array
+    type: object
+  models.GetChatUsersResponse:
+    properties:
+      users:
+        items:
+          type: string
+        type: array
+    type: object
+  models.GetMeChatsResponse:
+    properties:
+      chat_id:
+        items:
+          type: string
+        type: array
+    type: object
   models.GetUserByIdRequest:
     properties:
       id:
@@ -112,7 +145,7 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Это документация для вашего API
+  description: Gateway для мессанджера
   title: Messenger API
   version: "1.0"
 paths:
@@ -170,6 +203,110 @@ paths:
       summary: Регистрация нового пользователя
       tags:
       - auth
+  /chat:
+    get:
+      consumes:
+      - application/json
+      description: получить свои чаты
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetMeChatsResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: GetMeChats
+      tags:
+      - chats
+  /chat/{chat_id}/users:
+    get:
+      consumes:
+      - application/json
+      description: получить пользователей чата
+      parameters:
+      - description: ID чата
+        in: path
+        name: chat_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetChatUsersResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: GetChatUsers
+      tags:
+      - chats
+  /chat/private:
+    post:
+      consumes:
+      - application/json
+      description: создать приватный чат
+      parameters:
+      - description: Данные чата
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePrivateChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreatePrivateChatResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: CreatePrivateChat
+      tags:
+      - chats
+  /chat/public:
+    post:
+      consumes:
+      - application/json
+      description: создать группу
+      parameters:
+      - description: Данные чата
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePublicChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreatePrivateChatResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: CreatePublicChat
+      tags:
+      - chats
   /user/id:
     get:
       consumes:
