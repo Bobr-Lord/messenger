@@ -1,13 +1,20 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"gitlab.com/bobr-lord-messenger/message/internal/models"
+)
 
 type Message interface {
+	Save(msg *models.Message) (string, error)
+	GetUserMessages(userID string) ([]*models.Message, error)
 }
 type Repository struct {
 	Message Message
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{}
+	return &Repository{
+		Message: NewMessageRepo(db),
+	}
 }
