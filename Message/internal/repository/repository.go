@@ -8,6 +8,7 @@ import (
 type Message interface {
 	Save(msg *models.Message) (string, error)
 	GetUserMessages(userID string) ([]*models.Message, error)
+	GetMessagesByChatID(chatID string) ([]*models.Message, error)
 }
 type Repository struct {
 	Message Message

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"gitlab.com/bobr-lord-messenger/message/internal/handler/middleware"
 	"gitlab.com/bobr-lord-messenger/message/internal/service"
 )
 
@@ -17,10 +18,11 @@ func NewHandler(svc *service.Service) *Handler {
 
 func (h *Handler) InitRouter() *gin.Engine {
 	router := gin.New()
+	router.Use(middleware.RequestMiddleware())
 	mess := router.Group("/message")
 	{
-		mess.GET("/:chat_id", h.GetMessagesFromChat)
-		mess.POST("/mark-read", h.ChangeMessageStatus)
+		mess.GET("/user/:user_id", h.GetUserMessage)
+		mess.GET("/chat/:chat_id", h.GetMessagesByChatID)
 	}
 
 	return router

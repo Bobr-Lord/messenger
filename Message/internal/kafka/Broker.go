@@ -5,19 +5,31 @@ import (
 	"gitlab.com/bobr-lord-messenger/message/internal/repository"
 )
 
-type Consumer interface {
+type ConsumerMess interface {
 	Start(ctx context.Context)
 	Close() error
 }
-type Producer interface {
+type ProducerMess interface {
+	Send(ctx context.Context, key, value []byte) error
+	Close() error
 }
 
-type Broker struct {
-	Consumer Consumer
+type ConsumerKafka struct {
+	Consumer ConsumerMess
 }
 
-func NewBreaker(repo *repository.Repository, addr []string) *Broker {
-	return &Broker{
-		Consumer: NewConsumerMessage(addr, repo),
+type ProducerKafka struct {
+	Producer ProducerMess
+}
+
+func NewConsumerKafka(addr []string, repo *repository.Repository, prod *ProducerKafka) *ConsumerKafka {
+	return &ConsumerKafka{
+		Consumer: NewConsumerMessage(addr, repo, prod),
+	}
+}
+
+func NewProducerKafka(addr []string) *ProducerKafka {
+	return &ProducerKafka{
+		Producer: NewProducerMessage(addr),
 	}
 }

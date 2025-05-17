@@ -18,9 +18,10 @@ const (
 type ConsumerMessage struct {
 	reader *kafka.Reader
 	repo   *repository.Repository
+	prod   *ProducerKafka
 }
 
-func NewConsumerMessage(brokers []string, repo *repository.Repository) *ConsumerMessage {
+func NewConsumerMessage(brokers []string, repo *repository.Repository, prod *ProducerKafka) *ConsumerMessage {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     brokers,
 		Topic:       TopicMessageSend,
@@ -33,6 +34,7 @@ func NewConsumerMessage(brokers []string, repo *repository.Repository) *Consumer
 	return &ConsumerMessage{
 		reader: r,
 		repo:   repo,
+		prod:   prod,
 	}
 }
 
@@ -57,6 +59,11 @@ func (c *ConsumerMessage) Start(ctx context.Context) {
 			continue
 		}
 		logrus.Infof("message saved with ID: %s", id)
+		if err := c.prod.Producer.Send(context.Background(), []byte(msg.ChatID), m.Value); err != nil {
+			logrus.Errorf("Error sending message: %v", err)
+			continue
+		}
+		logrus.Info("message sent")
 	}
 }
 

@@ -43,3 +43,13 @@ func (r *MessageRepo) GetUserMessages(userID string) ([]*models.Message, error) 
 	}
 	return messages, nil
 }
+
+func (r *MessageRepo) GetMessagesByChatID(chatID string) ([]*models.Message, error) {
+	var messages []*models.Message
+	query := "SELECT * FROM messages WHERE chat_id = $1"
+	err := r.db.Select(&messages, query, chatID)
+	if err != nil {
+		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("failed to get user messages: %v", err))
+	}
+	return messages, nil
+}

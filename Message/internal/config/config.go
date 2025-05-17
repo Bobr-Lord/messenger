@@ -14,6 +14,8 @@ type Config struct {
 	PostgresUser     string `env:"POSTGRES_USER"`
 	PostgresPassword string `env:"POSTGRES_PASSWORD"`
 	PostgresDatabase string `env:"POSTGRES_DATABASE"`
+	KafkaHost        string `env:"KAFKA_HOST"`
+	KafkaPort        string `env:"KAFKA_PORT"`
 }
 
 func NewConfig() (*Config, error) {
