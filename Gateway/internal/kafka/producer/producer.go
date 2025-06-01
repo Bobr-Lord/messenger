@@ -1,9 +1,13 @@
-package kafka
+package producer
 
 import (
 	"context"
 	"github.com/segmentio/kafka-go"
 	"time"
+)
+
+const (
+	TopicMessageSend = "message.send"
 )
 
 type ProducerKafka struct {

@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/models"
+
 	//"gitlab.com/bobr-lord-messenger/gateway/internal/models"
 	"log"
 	"net/http"
@@ -83,15 +86,17 @@ func (h *Handler) Websocket(c *gin.Context) {
 
 		if err := conn.WriteMessage(websocket.PongMessage, []byte("Message received")); err != nil {
 			log.Println("Error sending message:", err)
-			return
+			break
 		}
 
-		//in := models.Message{
-		//	SenderID: userID,
-		//}
-		//
+		var in models.MessageDelivery
 
-		if err := h.prod.Producer.Send(c, []byte(userID), nil); err != nil {
+		if err := json.Unmarshal(msg, &in); err != nil {
+			logrus.Info("Error json decoding message:", err)
+			break
+		}
+
+		if err := h.prod.Send(c, []byte(in.ChatID), msg); err != nil {
 			logrus.WithFields(logrus.Fields{
 				middleware.RequestIDKey: requestID,
 			}).Error(fmt.Sprintf("error sending message: %v", err))

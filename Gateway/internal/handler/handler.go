@@ -8,7 +8,7 @@ import (
 	"github.com/swaggo/gin-swagger"
 	_ "gitlab.com/bobr-lord-messenger/gateway/docs" // тут будет документация
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
-	"gitlab.com/bobr-lord-messenger/gateway/internal/kafka"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/kafka/producer"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
 	"net/http"
@@ -20,10 +20,10 @@ type Handler struct {
 	connections map[string]*websocket.Conn
 	redisCon    *redis.Client
 	cfg         *config.Config
-	prod        *kafka.Producer
+	prod        *producer.ProducerKafka
 }
 
-func NewHandler(srv *service.Service, redisConn *redis.Client, cfg *config.Config, prod *kafka.Producer) *Handler {
+func NewHandler(srv *service.Service, redisConn *redis.Client, cfg *config.Config, prod *producer.ProducerKafka) *Handler {
 	return &Handler{
 		service:     srv,
 		connections: make(map[string]*websocket.Conn),

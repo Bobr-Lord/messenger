@@ -28,10 +28,11 @@ func (h *Handler) HandleWebsocketRequest(msg *models.MessageDelivery) error {
 		logrus.Errorf("Error marshalling json: %v", err)
 		return err
 	}
-	if err := conn.WriteMessage(websocket.PingMessage, jsMes); err != nil {
+	if err := conn.WriteMessage(websocket.TextMessage, jsMes); err != nil {
 		logrus.Errorf("Error sending ping message: %v", err)
 		return err
 	}
+
 	logrus.Info("Successfully send mess")
 	return nil
 }

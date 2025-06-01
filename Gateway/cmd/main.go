@@ -7,7 +7,8 @@ import (
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
 	hand "gitlab.com/bobr-lord-messenger/gateway/internal/handler"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/jwtutil"
-	"gitlab.com/bobr-lord-messenger/gateway/internal/kafka"
+	cnsm "gitlab.com/bobr-lord-messenger/gateway/internal/kafka/consumer"
+	prd "gitlab.com/bobr-lord-messenger/gateway/internal/kafka/producer"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/repository"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/server"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
@@ -20,11 +21,9 @@ import (
 
 // @title Messenger API
 // @version 1.0
-// @description Gateway для мессанджера
-
+// @description API Gateway for the Messenger service
 // @host localhost:8080
 // @BasePath /
-
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
@@ -44,15 +43,15 @@ func main() {
 	addrKafka := []string{
 		cfg.KafkaHost + ":" + cfg.KafkaPort,
 	}
-	producer := kafka.NewProducer(addrKafka)
+	producer := prd.NewProducerMessage(addrKafka)
 
 	repo := repository.NewRepository(cfg)
 	svc := service.NewService(repo)
 	handler := hand.NewHandler(svc, redisConn, cfg, producer)
 
-	consumer := kafka.NewConsumer(addrKafka, handler)
+	consumer := cnsm.NewConsumerMessage(addrKafka, handler)
 	go func() {
-		consumer.Consumer.Start(context.Background())
+		consumer.Start(context.Background())
 	}()
 
 	srv := server.NewServer()
@@ -67,10 +66,10 @@ func main() {
 
 	logrus.Info("Shutting down server...")
 
-	if err := consumer.Consumer.Close(); err != nil {
+	if err := consumer.Close(); err != nil {
 		logrus.Errorf("Error closing consumer: %v", err)
 	}
-	if err := producer.Producer.Close(); err != nil {
+	if err := producer.Close(); err != nil {
 		logrus.Errorf("Error closing producer: %v", err)
 	}
 

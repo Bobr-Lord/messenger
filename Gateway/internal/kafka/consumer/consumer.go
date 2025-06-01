@@ -1,4 +1,4 @@
-package kafka
+package consumer
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	TopicMessageSend      = "message.send"
 	TopicMessageDelivered = "message.delivered"
 )
 
