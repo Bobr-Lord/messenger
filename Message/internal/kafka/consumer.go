@@ -3,10 +3,13 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/segmentio/kafka-go"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/message/internal/models"
 	"gitlab.com/bobr-lord-messenger/message/internal/repository"
+	"io"
 	"time"
 )
 
@@ -42,17 +45,25 @@ func (c *ConsumerMessage) Start(ctx context.Context) {
 	for {
 		m, err := c.reader.ReadMessage(ctx)
 		if err != nil {
+			if err == io.EOF || errors.Is(err, io.EOF) {
+				return
+			}
+			fmt.Println(err)
 			logrus.Errorf("Error reading message: %v", err)
 			continue
 		}
 
 		logrus.Infof("Message received from topic %s: %s", m.Topic, string(m.Value))
-		var msg *models.Message
-		if err := json.Unmarshal(m.Value, &msg); err != nil {
+		var reqKafka *models.KafkaRequestMessage
+		if err := json.Unmarshal(m.Value, &reqKafka); err != nil {
 			logrus.Errorf("Error unmarshalling message: %v", err)
 			continue
 		}
-		logrus.Infof("message received: %+v", msg)
+		msg := &models.Message{
+			ChatID:   reqKafka.ChatID,
+			SenderID: reqKafka.UserID,
+			Content:  reqKafka.Content,
+		}
 		id, err := c.repo.Message.Save(msg)
 		if err != nil {
 			logrus.Errorf("Error saving message: %v", err)
@@ -66,7 +77,8 @@ func (c *ConsumerMessage) Start(ctx context.Context) {
 			continue
 		}
 		for _, user := range *users {
-			var req *models.MessageDelivery
+			var req models.MessageDelivery
+			fmt.Println(user)
 			req.UserID = user
 			req.ChatID = msg.ChatID
 			req.Content = msg.Content
@@ -79,7 +91,7 @@ func (c *ConsumerMessage) Start(ctx context.Context) {
 				logrus.Errorf("Error sending message: %v", err)
 				continue
 			}
-			logrus.Infof("message sent: %+v", reqJS)
+			logrus.Infof("message sent in topic %v: %+v", TopicMessageDelivered, string(reqJS))
 		}
 	}
 }

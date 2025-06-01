@@ -56,7 +56,7 @@ func (r *MessageRepo) GetMessagesByChatID(chatID string) ([]*models.Message, err
 
 func (r *MessageRepo) UsersSendMess(chatID string, senderID string) (*[]string, error) {
 	var users []string
-	query := "SELECT user_id FROM chat_participants WHERE chat_id = $1 AND user_id = $2"
+	query := "SELECT user_id FROM chat_participants WHERE chat_id = $1 AND user_id != $2"
 	err := r.db.Select(&users, query, chatID, senderID)
 	if err != nil {
 		return nil, errors.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("failed to get user messages: %v", err))

@@ -25,3 +25,9 @@ type GetUserMessageRequest struct {
 type GetUserMessageResponse struct {
 	Messages []*Message `json:"message"`
 }
+
+type KafkaRequestMessage struct {
+	UserID  string `json:"user_id" db:"user_id"`
+	ChatID  string `json:"chat_id" db:"chat_id"`
+	Content string `json:"content" db:"content"`
+}
