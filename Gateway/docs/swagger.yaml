@@ -145,7 +145,7 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Gateway для мессанджера
+  description: API Gateway for the Messenger service
   title: Messenger API
   version: "1.0"
 paths:

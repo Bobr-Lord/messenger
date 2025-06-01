@@ -12,7 +12,6 @@ import (
 
 	//"gitlab.com/bobr-lord-messenger/gateway/internal/models"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -27,28 +26,20 @@ func (h *Handler) Websocket(c *gin.Context) {
 	if !exists {
 		requestID = "unknown"
 	}
-	userHeader, exists := c.Get(middleware.UserIDKey)
-	if !exists {
-		c.Status(http.StatusUnauthorized)
-		return
-	}
-	userID, ok := userHeader.(string)
-	if !ok {
-		c.Status(http.StatusUnauthorized)
-		return
-	}
+
+	userID := c.Query("userID")
+
 	logrus.WithFields(logrus.Fields{
 		middleware.RequestIDKey: requestID,
-	}).Info("Handle Websocket")
+	}).Infof("Handle Websocket, userID: %v", userID)
 	socketID := uuid.NewString()
 
-	if err := h.redisCon.Set(c, "socket:"+userID, socketID, time.Minute*30).Err(); err != nil {
-		logrus.WithFields(logrus.Fields{
-			middleware.RequestIDKey: requestID,
-		}).Error(fmt.Sprintf("error setting socket for redis: %v", err))
-		c.Status(http.StatusInternalServerError)
-		return
-	}
+	h.redisCon.Set(c, "socket:"+userID, socketID, time.Minute*30)
+	fmt.Println(userID)
+	logrus.WithFields(logrus.Fields{
+		middleware.RequestIDKey: requestID,
+	}).Info("Save redis socket")
+
 	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -65,7 +56,7 @@ func (h *Handler) Websocket(c *gin.Context) {
 	}).Info(fmt.Sprintf("User %s connected with socketID %s\n", userID, socketID))
 
 	for {
-		if h.redisCon.Get(c, "socket:"+userID) == nil {
+		if h.redisCon.Get(c, "socket:"+userID).Err() != nil {
 			logrus.WithFields(logrus.Fields{
 				middleware.RequestIDKey: requestID,
 			}).Info("connection closed")

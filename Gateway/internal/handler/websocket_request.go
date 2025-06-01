@@ -9,11 +9,12 @@ import (
 )
 
 func (h *Handler) HandleWebsocketRequest(msg *models.MessageDelivery) error {
-	socketID, err := h.redisCon.Get(context.Background(), "socket").Result()
+	socketID, err := h.redisCon.Get(context.Background(), "socket:"+msg.UserID).Result()
 	if err != nil {
 		logrus.Errorf("Error connecting to redis: %v", err)
 		return err
 	}
+	logrus.Infof("ebsocket Send for SocketID: %v", socketID)
 	conn, ok := h.connections[socketID]
 	if !ok {
 		logrus.Errorf("Error connecting to redis for socket %v", socketID)

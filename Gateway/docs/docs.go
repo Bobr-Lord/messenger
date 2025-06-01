@@ -716,7 +716,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Messenger API",
-	Description:      "Gateway для мессанджера",
+	Description:      "API Gateway for the Messenger service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

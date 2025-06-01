@@ -6,8 +6,7 @@ services:
     container_name: redis
     networks:
       - app
-    ports:
-      - "6379:6379"
+
     volumes:
       - redis-data:/data
     healthcheck:
@@ -26,8 +25,7 @@ services:
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: postgres
       PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
+
     volumes:
       - pgdata:/var/lib/postgresql/data/pgdata
     healthcheck:
@@ -58,8 +56,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "8081:8081"
+
   user-service:
     image: user-service
     container_name: user-service
@@ -70,8 +67,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "8082:8082"
+
     environment:
       SERVICE_HOST: 0.0.0.0
       SERVICE_PORT: 8082
@@ -90,8 +86,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "8083:8083"
+
     environment:
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8083
@@ -101,20 +96,84 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_DB_NAME: postgres
       APP_ENV: production
-  kafka:
-    image: apache/kafka:3.7.0
-    container_name: kafka
-    ports:
-      - "9092:9092"
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: zookeeper
+    networks:
+      - app
+
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
-      KAFKA_CLUSTER_ID: ZYzYaT-GeneratedClusterID # можно сгенерировать один раз командой: kafka-storage.sh random-uuid
+      ALLOW_ANONYMOUS_LOGIN: yes
+
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: kafka
+    networks:
+      - app
+
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092  # <-- вот это ключевое
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    depends_on:
+      - zookeeper
+  message-service:
+    container_name: message-service
+    image: message-service
+
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8084
+
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: postgres
+
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
+    networks:
+      - app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  gateway:
+    container_name: gateway
+    image: gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      PUBLIC_KEY_PATH: /app/keys/public.pem
+
+      AUTH_SERVICE_HOST: auth-service
+      AUTH_SERVICE_PORT: 8081
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_PORT: 8082
+
+      CHAT_SERVICE_HOST: chat-service
+      CHAT_SERVICE_PORT: 8083
+
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
+    networks:
+      - app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   redis-data:

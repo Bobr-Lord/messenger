@@ -84,7 +84,16 @@ func main() {
 }
 
 func initRedis(cfg *config.Config) *redis.Client {
-	return redis.NewClient(&redis.Options{
+	rdb := redis.NewClient(&redis.Options{
 		Addr: cfg.RedisHost + ":" + cfg.RedisPort,
 	})
+
+	// Проверим соединение командой PING
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		logrus.Errorf("Error connecting to redis: %v", err)
+		return rdb
+	}
+
+	logrus.Info("Connected to redis")
+	return rdb
 }
