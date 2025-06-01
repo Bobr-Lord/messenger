@@ -1,31 +1,33 @@
 package kafka
 
-import "context"
+import (
+	"context"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/handler"
+)
 
-type Producer interface {
+type ConsumerInterface interface {
+	Start(context.Context)
+	Close() error
+}
+type Consumer struct {
+	Consumer ConsumerInterface
+}
+
+type ProducerInterface interface {
 	Send(ctx context.Context, key, value []byte) error
 	Close() error
 }
-
-type Consumer interface {
-	Start(ctx context.Context)
-	Close() error
+type Producer struct {
+	Producer ProducerInterface
 }
 
-type BrokerProducer struct {
-	Producer Producer
-}
-type BrokerConsumer struct {
-	Consumer Consumer
-}
-
-func NewBrokerProducer(addr []string) *BrokerProducer {
-	return &BrokerProducer{
-		Producer: NewProducerMessage(addr),
+func NewConsumer(addr []string, h *handler.Handler) *Consumer {
+	return &Consumer{
+		Consumer: NewConsumerMessage(addr, h),
 	}
 }
-func NewBrokerConsumer(addr []string) *BrokerConsumer {
-	return &BrokerConsumer{
-		Consumer: NewConsumerMessage(addr),
+func NewProducer(addr []string) *Producer {
+	return &Producer{
+		Producer: NewProducerMessage(addr),
 	}
 }

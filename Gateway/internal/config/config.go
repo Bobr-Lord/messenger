@@ -19,6 +19,8 @@ type Config struct {
 	ChatServicePort string `env:"CHAT_SERVICE_PORT" required:"true"`
 	RedisHost       string `env:"REDIS_HOST" required:"true"`
 	RedisPort       string `env:"REDIS_PORT" required:"true"`
+	KafkaHost       string `env:"KAFKA_HOST" required:"true"`
+	KafkaPort       string `env:"KAFKA_PORT" required:"true"`
 }
 
 func NewConfig() (*Config, error) {

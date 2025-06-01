@@ -2,8 +2,11 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/segmentio/kafka-go"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/handler"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/models"
 	"time"
 )
 
@@ -14,9 +17,10 @@ const (
 
 type ConsumerKafka struct {
 	reader *kafka.Reader
+	h      *handler.Handler
 }
 
-func NewConsumerMessage(brokers []string) *ConsumerKafka {
+func NewConsumerMessage(brokers []string, h *handler.Handler) *ConsumerKafka {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     brokers,
 		Topic:       TopicMessageDelivered,
@@ -28,6 +32,7 @@ func NewConsumerMessage(brokers []string) *ConsumerKafka {
 	})
 	return &ConsumerKafka{
 		reader: r,
+		h:      h,
 	}
 }
 
@@ -39,6 +44,16 @@ func (c *ConsumerKafka) Start(ctx context.Context) {
 			continue
 		}
 		logrus.Infof("Message received from topic %s: %s", m.Topic, string(m.Value))
+		var req models.MessageDelivery
+		if err = json.Unmarshal(m.Value, &req); err != nil {
+			logrus.Errorf("Error unmarshalling message: %v", err)
+		}
+
+		if err := c.h.HandleWebsocketRequest(&req); err != nil {
+			logrus.Errorf("Error handling message: %v", err)
+			continue
+		}
+		logrus.Infof("Message delivered from topic %s: %+v", m.Topic, req)
 	}
 }
 

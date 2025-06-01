@@ -7,9 +7,11 @@ import (
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
 	hand "gitlab.com/bobr-lord-messenger/gateway/internal/handler"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/jwtutil"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/kafka"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/repository"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/server"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,22 +41,43 @@ func main() {
 	}
 	redisConn := initRedis(cfg)
 
-	repo := repository.NewRepository(cfg)
-	srvc := service.NewService(repo)
-	handler := hand.NewHandler(srvc, redisConn, cfg)
-	srvr := server.NewServer()
-	srvr.Run(cfg, handler.InitRoutes())
+	addrKafka := []string{
+		cfg.KafkaHost + ":" + cfg.KafkaPort,
+	}
+	producer := kafka.NewProducer(addrKafka)
 
+	repo := repository.NewRepository(cfg)
+	svc := service.NewService(repo)
+	handler := hand.NewHandler(svc, redisConn, cfg, producer)
+
+	consumer := kafka.NewConsumer(addrKafka, handler)
+	go func() {
+		consumer.Consumer.Start(context.Background())
+	}()
+
+	srv := server.NewServer()
+	go func() {
+		if err := srv.Run(cfg, handler.InitRoutes()); err != nil && err != http.ErrServerClosed {
+			logrus.Errorf("Error starting server: %v", err)
+		}
+	}()
 	wait := make(chan os.Signal, 1)
 	signal.Notify(wait, syscall.SIGINT, syscall.SIGTERM)
 	<-wait
 
 	logrus.Info("Shutting down server...")
 
+	if err := consumer.Consumer.Close(); err != nil {
+		logrus.Errorf("Error closing consumer: %v", err)
+	}
+	if err := producer.Producer.Close(); err != nil {
+		logrus.Errorf("Error closing producer: %v", err)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := srvr.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(ctx); err != nil {
 		logrus.Errorf("Server shutdown error: %v", err)
 	} else {
 		logrus.Info("Server shutdown complete.")

@@ -10,10 +10,6 @@ type ProducerKafka struct {
 	writer *kafka.Writer
 }
 
-func NewProducer() *ProducerKafka {
-	return &ProducerKafka{}
-}
-
 func NewProducerMessage(brokers []string) *ProducerKafka {
 	writer := &kafka.Writer{
 		Addr:     kafka.TCP(brokers...),

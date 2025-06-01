@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
+	//"gitlab.com/bobr-lord-messenger/gateway/internal/models"
 	"log"
 	"net/http"
+	"time"
 )
 
 // Websocket godoc
@@ -36,7 +39,7 @@ func (h *Handler) Websocket(c *gin.Context) {
 	}).Info("Handle Websocket")
 	socketID := uuid.NewString()
 
-	if err := h.redisCon.Set(c, "socket:"+userID, socketID, 0).Err(); err != nil {
+	if err := h.redisCon.Set(c, "socket:"+userID, socketID, time.Minute*30).Err(); err != nil {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestID,
 		}).Error(fmt.Sprintf("error setting socket for redis: %v", err))
@@ -59,7 +62,13 @@ func (h *Handler) Websocket(c *gin.Context) {
 	}).Info(fmt.Sprintf("User %s connected with socketID %s\n", userID, socketID))
 
 	for {
-		messageType, msg, err := conn.ReadMessage()
+		if h.redisCon.Get(c, "socket:"+userID) == nil {
+			logrus.WithFields(logrus.Fields{
+				middleware.RequestIDKey: requestID,
+			}).Info("connection closed")
+			break
+		}
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"socketID":              socketID,
@@ -72,11 +81,23 @@ func (h *Handler) Websocket(c *gin.Context) {
 			middleware.RequestIDKey: requestID,
 		}).Info(string(msg))
 
-		if err := conn.WriteMessage(messageType, []byte("Message received")); err != nil {
+		if err := conn.WriteMessage(websocket.PongMessage, []byte("Message received")); err != nil {
 			log.Println("Error sending message:", err)
 			return
 		}
+
+		//in := models.Message{
+		//	SenderID: userID,
+		//}
+		//
+
+		if err := h.prod.Producer.Send(c, []byte(userID), nil); err != nil {
+			logrus.WithFields(logrus.Fields{
+				middleware.RequestIDKey: requestID,
+			}).Error(fmt.Sprintf("error sending message: %v", err))
+			break
+		}
 	}
 	delete(h.connections, socketID)
-	h.redisCon.Del(c, "socket:"+socketID)
+	h.redisCon.Del(c, "socket:"+userID)
 }

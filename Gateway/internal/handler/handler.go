@@ -8,6 +8,7 @@ import (
 	"github.com/swaggo/gin-swagger"
 	_ "gitlab.com/bobr-lord-messenger/gateway/docs" // тут будет документация
 	"gitlab.com/bobr-lord-messenger/gateway/internal/config"
+	"gitlab.com/bobr-lord-messenger/gateway/internal/kafka"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/service"
 	"net/http"
@@ -19,9 +20,10 @@ type Handler struct {
 	connections map[string]*websocket.Conn
 	redisCon    *redis.Client
 	cfg         *config.Config
+	prod        *kafka.Producer
 }
 
-func NewHandler(srv *service.Service, redisConn *redis.Client, cfg *config.Config) *Handler {
+func NewHandler(srv *service.Service, redisConn *redis.Client, cfg *config.Config, prod *kafka.Producer) *Handler {
 	return &Handler{
 		service:     srv,
 		connections: make(map[string]*websocket.Conn),
@@ -31,7 +33,8 @@ func NewHandler(srv *service.Service, redisConn *redis.Client, cfg *config.Confi
 				return true // разрешаем все соединения, для разработки ок
 			},
 		},
-		cfg: cfg,
+		cfg:  cfg,
+		prod: prod,
 	}
 }
 
