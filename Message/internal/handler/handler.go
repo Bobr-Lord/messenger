@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/bobr-lord-messenger/message/internal/handler/middleware"
+	"gitlab.com/bobr-lord-messenger/message/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/message/internal/service"
 )
 

@@ -59,11 +59,28 @@ func (c *ConsumerMessage) Start(ctx context.Context) {
 			continue
 		}
 		logrus.Infof("message saved with ID: %s", id)
-		if err := c.prod.Producer.Send(context.Background(), []byte(msg.ChatID), m.Value); err != nil {
+
+		users, err := c.repo.Message.UsersSendMess(msg.ChatID, msg.SenderID)
+		if err != nil {
 			logrus.Errorf("Error sending message: %v", err)
 			continue
 		}
-		logrus.Info("message sent")
+		for _, user := range *users {
+			var req *models.MessageDelivery
+			req.UserID = user
+			req.ChatID = msg.ChatID
+			req.Content = msg.Content
+			reqJS, err := json.Marshal(req)
+			if err != nil {
+				logrus.Errorf("Error marshalling message: %v", err)
+				continue
+			}
+			if err := c.prod.Producer.Send(context.Background(), []byte(id), reqJS); err != nil {
+				logrus.Errorf("Error sending message: %v", err)
+				continue
+			}
+			logrus.Infof("message sent: %+v", reqJS)
+		}
 	}
 }
 

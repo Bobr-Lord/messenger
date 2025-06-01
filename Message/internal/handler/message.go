@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/message/internal/errors"
-	"gitlab.com/bobr-lord-messenger/message/internal/handler/middleware"
+	"gitlab.com/bobr-lord-messenger/message/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/message/internal/models"
 	"net/http"
 )
