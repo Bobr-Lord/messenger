@@ -153,9 +153,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: авторизация и генерация jwt
+      description: Выполняет авторизацию пользователя и генерирует JWT токен. Принимает
+        данные для входа и возвращает токен при успешной авторизации.
       parameters:
-      - description: Данные регистрации
+      - description: Данные для авторизации пользователей
         in: body
         name: input
         required: true
@@ -165,25 +166,34 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Успешная авторизация, возвращает JWT токен
           schema:
             $ref: '#/definitions/models.LoginResponse'
-        default:
-          description: ""
+        "400":
+          description: Неверные данные для авторизации
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Не авторизован, неверные учетные данные
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Login
+      summary: Авторизация пользователя
       tags:
       - auth
   /auth/register:
     post:
       consumes:
       - application/json
-      description: Регистрирует нового пользователя
+      description: Регистрирует нового пользователя. Принимает данные для регистрации
+        и возвращает ответ с информацией о созданном пользователе.
       parameters:
-      - description: Данные регистрации
+      - description: Данные для регистрации нового пользователя
         in: body
         name: input
         required: true
@@ -193,11 +203,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Успешная регистрация
           schema:
             $ref: '#/definitions/models.RegisterResponse'
-        default:
-          description: ""
+        "400":
+          description: Неверные данные для регистрации
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Регистрация нового пользователя
@@ -207,7 +221,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: получить свои чаты
+      description: Retrieve all user chats
       produces:
       - application/json
       responses:
@@ -215,13 +229,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.GetMeChatsResponse'
-        default:
-          description: ""
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: GetMeChats
+      summary: Get My Chats
       tags:
       - chats
   /chat/{chat_id}/users:
@@ -255,9 +269,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: создать приватный чат
+      description: Create a private chat between users
       parameters:
-      - description: Данные чата
+      - description: Private Chat Data
         in: body
         name: input
         required: true
@@ -266,26 +280,30 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/models.CreatePrivateChatResponse'
-        default:
-          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: CreatePrivateChat
+      summary: Create Private Chat
       tags:
       - chats
   /chat/public:
     post:
       consumes:
       - application/json
-      description: создать группу
+      description: Create a public group chat
       parameters:
-      - description: Данные чата
+      - description: Public Chat Data
         in: body
         name: input
         required: true
@@ -294,24 +312,28 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/models.CreatePrivateChatResponse'
-        default:
-          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: CreatePublicChat
+      summary: Create Public Chat
       tags:
       - chats
   /user/id:
     get:
       consumes:
       - application/json
-      description: получить пользователя по id
+      description: Retrieve user data by user ID.
       parameters:
       - description: id пользователя
         in: body
@@ -332,14 +354,14 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: GetUserByID
+      summary: Get User By ID
       tags:
       - users
   /user/me:
     get:
       consumes:
       - application/json
-      description: получить свои данные
+      description: Retrieve the currently authenticated user's data.
       produces:
       - application/json
       responses:
@@ -347,21 +369,25 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.LoginResponse'
-        default:
-          description: ""
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: GetME
+      summary: Get User Information
       tags:
       - users
     put:
       consumes:
       - application/json
-      description: обновить свои данные
+      description: Update the currently authenticated user's data.
       parameters:
-      - description: Данные пользователя
+      - description: User Update Data
         in: body
         name: input
         required: true
@@ -370,13 +396,21 @@ paths:
       produces:
       - application/json
       responses:
-        default:
-          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: UpdateMe
+      summary: Update User Information
       tags:
       - users
   /user/name:
@@ -411,7 +445,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: получить всех пользователей
+      description: Retrieve a list of all users.
       produces:
       - application/json
       responses:
@@ -419,19 +453,45 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.GetUsersResponse'
-        default:
-          description: ""
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: GetUsers
+      summary: Get All Users
       tags:
       - users
   /ws:
     get:
-      description: websocket коннект
-      responses: {}
+      consumes:
+      - application/json
+      description: Establish a websocket connection for real-time messaging.
+      parameters:
+      - description: User ID for the connection
+        in: query
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Connection Established
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
       security:
       - BearerAuth: []
       summary: WebSocket

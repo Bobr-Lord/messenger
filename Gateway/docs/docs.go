@@ -22,7 +22,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "авторизация и генерация jwt",
+                "description": "Выполняет авторизацию пользователя и генерирует JWT токен. Принимает данные для входа и возвращает токен при успешной авторизации.",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,10 +32,10 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Login",
+                "summary": "Авторизация пользователя",
                 "parameters": [
                     {
-                        "description": "Данные регистрации",
+                        "description": "Данные для авторизации пользователей",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -46,13 +46,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Успешная авторизация, возвращает JWT токен",
                         "schema": {
                             "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "400": {
+                        "description": "Неверные данные для авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован, неверные учетные данные",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -62,7 +74,7 @@ const docTemplate = `{
         },
         "/auth/register": {
             "post": {
-                "description": "Регистрирует нового пользователя",
+                "description": "Регистрирует нового пользователя. Принимает данные для регистрации и возвращает ответ с информацией о созданном пользователе.",
                 "consumes": [
                     "application/json"
                 ],
@@ -75,7 +87,7 @@ const docTemplate = `{
                 "summary": "Регистрация нового пользователя",
                 "parameters": [
                     {
-                        "description": "Данные регистрации",
+                        "description": "Данные для регистрации нового пользователя",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -86,13 +98,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Успешная регистрация",
                         "schema": {
                             "$ref": "#/definitions/models.RegisterResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "400": {
+                        "description": "Неверные данные для регистрации",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -107,7 +125,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "получить свои чаты",
+                "description": "Retrieve all user chats",
                 "consumes": [
                     "application/json"
                 ],
@@ -117,7 +135,7 @@ const docTemplate = `{
                 "tags": [
                     "chats"
                 ],
-                "summary": "GetMeChats",
+                "summary": "Get My Chats",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -125,8 +143,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.GetMeChatsResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -141,7 +159,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "создать приватный чат",
+                "description": "Create a private chat between users",
                 "consumes": [
                     "application/json"
                 ],
@@ -151,10 +169,10 @@ const docTemplate = `{
                 "tags": [
                     "chats"
                 ],
-                "summary": "CreatePrivateChat",
+                "summary": "Create Private Chat",
                 "parameters": [
                     {
-                        "description": "Данные чата",
+                        "description": "Private Chat Data",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -164,14 +182,20 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.CreatePrivateChatResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -186,7 +210,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "создать группу",
+                "description": "Create a public group chat",
                 "consumes": [
                     "application/json"
                 ],
@@ -196,10 +220,10 @@ const docTemplate = `{
                 "tags": [
                     "chats"
                 ],
-                "summary": "CreatePublicChat",
+                "summary": "Create Public Chat",
                 "parameters": [
                     {
-                        "description": "Данные чата",
+                        "description": "Public Chat Data",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -209,14 +233,20 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.CreatePrivateChatResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -274,7 +304,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "получить пользователя по id",
+                "description": "Retrieve user data by user ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -284,7 +314,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "GetUserByID",
+                "summary": "Get User By ID",
                 "parameters": [
                     {
                         "description": "id пользователя",
@@ -319,7 +349,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "получить свои данные",
+                "description": "Retrieve the currently authenticated user's data.",
                 "consumes": [
                     "application/json"
                 ],
@@ -329,7 +359,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "GetME",
+                "summary": "Get User Information",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -337,8 +367,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -351,7 +387,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "обновить свои данные",
+                "description": "Update the currently authenticated user's data.",
                 "consumes": [
                     "application/json"
                 ],
@@ -361,10 +397,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "UpdateMe",
+                "summary": "Update User Information",
                 "parameters": [
                     {
-                        "description": "Данные пользователя",
+                        "description": "User Update Data",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -374,8 +410,20 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "default": {
-                        "description": "",
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -435,7 +483,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "получить всех пользователей",
+                "description": "Retrieve a list of all users.",
                 "consumes": [
                     "application/json"
                 ],
@@ -445,7 +493,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "GetUsers",
+                "summary": "Get All Users",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -453,8 +501,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.GetUsersResponse"
                         }
                     },
-                    "default": {
-                        "description": "",
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -469,12 +523,46 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "websocket коннект",
+                "description": "Establish a websocket connection for real-time messaging.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "websocket"
                 ],
                 "summary": "WebSocket",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID for the connection",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Connection Established",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },

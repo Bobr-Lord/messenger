@@ -11,13 +11,14 @@ import (
 
 // GetMe godoc
 // @Security BearerAuth
-// @Summary      GetME
-// @Description  получить свои данные
+// @Summary      Get User Information
+// @Description  Retrieve the currently authenticated user's data.
 // @Tags         users
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  models.LoginResponse
-// @Failure default {object} errors.ErrorResponse
+// @Failure      401  {object}  errors.ErrorResponse "Unauthorized"
+// @Failure      500  {object}  errors.ErrorResponse "Internal Server Error"
 // @Router       /user/me [get]
 func (h *Handler) GetMe(c *gin.Context) {
 	requestID, ok := c.Get(middleware.RequestIDKey)
@@ -54,13 +55,15 @@ func (h *Handler) GetMe(c *gin.Context) {
 
 // UpdateMe godoc
 // @Security BearerAuth
-// @Summary      UpdateMe
-// @Description  обновить свои данные
+// @Summary      Update User Information
+// @Description  Update the currently authenticated user's data.
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        input  body  models.UpdateMeRequest  true  "Данные пользователя"
-// @Failure default {object} errors.ErrorResponse
+// @Param        input  body  models.UpdateMeRequest  true  "User Update Data"
+// @Failure      400  {object}  errors.ErrorResponse "Bad Request"
+// @Failure      401  {object}  errors.ErrorResponse "Unauthorized"
+// @Failure      500  {object}  errors.ErrorResponse "Internal Server Error"
 // @Router       /user/me [put]
 func (h *Handler) UpdateMe(c *gin.Context) {
 	requestID, ok := c.Get(middleware.RequestIDKey)
@@ -69,12 +72,12 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 	}
 	logrus.WithFields(logrus.Fields{
 		"requestID": requestID,
-	}).Info("handler.GetMe")
+	}).Info("handler.UpdateMe")
 	id, ok := c.Get(middleware.UserIDKey)
 	if !ok {
 		logrus.WithFields(logrus.Fields{
 			"requestID": requestID,
-		}).Error("handler.GetMe: failed to get user id")
+		}).Error("handler.UpdateMe: failed to get user id")
 		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
 		c.JSON(http.StatusOK, errResp)
 		return
@@ -84,7 +87,7 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestID": requestID,
 		}).Errorf("error parsing request: %v", err)
-		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
+		errResp := customErr.NewErrorResponse(http.StatusBadRequest, "bad request")
 		c.JSON(http.StatusOK, errResp)
 		return
 	}
@@ -98,18 +101,19 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 		c.JSON(http.StatusOK, errResp)
 		return
 	}
-	c.Status(200)
+	c.Status(http.StatusOK)
 }
 
 // GetUsers godoc
 // @Security BearerAuth
-// @Summary      GetUsers
-// @Description  получить всех пользователей
+// @Summary      Get All Users
+// @Description  Retrieve a list of all users.
 // @Tags         users
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  models.GetUsersResponse
-// @Failure default {object} errors.ErrorResponse
+// @Failure      401  {object}  errors.ErrorResponse "Unauthorized"
+// @Failure      500  {object}  errors.ErrorResponse "Internal Server Error"
 // @Router       /user/users [get]
 func (h *Handler) GetUsers(c *gin.Context) {
 	requestID, ok := c.Get(middleware.RequestIDKey)
@@ -132,7 +136,7 @@ func (h *Handler) GetUsers(c *gin.Context) {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"requestID": requestID,
-		}).Errorf("error getting user: %v", err)
+		}).Errorf("error getting users: %v", err)
 		code, msg := customErr.ParseCustomError(err)
 		errResp := customErr.NewErrorResponse(code, msg)
 		c.JSON(http.StatusOK, errResp)
@@ -143,8 +147,8 @@ func (h *Handler) GetUsers(c *gin.Context) {
 
 // GetUserByID godoc
 // @Security BearerAuth
-// @Summary      GetUserByID
-// @Description  получить пользователя по id
+// @Summary      Get User By ID
+// @Description  Retrieve user data by user ID.
 // @Tags         users
 // @Accept       json
 // @Produce      json

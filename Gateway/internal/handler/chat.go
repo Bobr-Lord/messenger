@@ -11,15 +11,16 @@ import (
 
 // CreatePrivateChat godoc
 // @Security BearerAuth
-// @Summary      CreatePrivateChat
-// @Description  создать приватный чат
-// @Tags         chats
-// @Accept       json
-// @Produce      json
-// @Param        input  body  models.CreatePrivateChatRequest  true  "Данные чата"
-// @Success      200  {object}  models.CreatePrivateChatResponse
-// @Failure default {object} errors.ErrorResponse
-// @Router       /chat/private [post]
+// @Summary Create Private Chat
+// @Description Create a private chat between users
+// @Tags chats
+// @Accept json
+// @Produce json
+// @Param input body models.CreatePrivateChatRequest true "Private Chat Data"
+// @Success 201 {object} models.CreatePrivateChatResponse
+// @Failure 400 {object} errors.ErrorResponse "Bad Request"
+// @Failure 500 {object} errors.ErrorResponse "Internal Server Error"
+// @Router /chat/private [post]
 func (h *Handler) CreatePrivateChat(c *gin.Context) {
 	requestID, ok := c.Get(middleware.RequestIDKey)
 	if !ok {
@@ -42,8 +43,8 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestID": requestID,
 		}).Errorf("CreatePrivateChat: ShouldBindJSON: %v", err)
-		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
-		c.JSON(http.StatusOK, errResp)
+		errResp := customErr.NewErrorResponse(http.StatusBadRequest, "invalid request data")
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	res, err := h.service.Chat.CreatePrivateChat(id.(string), &req)
@@ -52,26 +53,27 @@ func (h *Handler) CreatePrivateChat(c *gin.Context) {
 			"requestID": requestID,
 		}).Errorf("handler.GetMe: CreatePrivateChat error: %v", err)
 		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
-		c.JSON(http.StatusOK, errResp)
+		c.JSON(http.StatusInternalServerError, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
 		"requestID": requestID,
 	}).Infof("handler.GetMe: CreatePrivateChat: %v", res)
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusCreated, res)
 }
 
 // CreatePublicChat godoc
 // @Security BearerAuth
-// @Summary      CreatePublicChat
-// @Description  создать группу
-// @Tags         chats
-// @Accept       json
-// @Produce      json
-// @Param        input  body  models.CreatePublicChatRequest  true  "Данные чата"
-// @Success      200  {object}  models.CreatePrivateChatResponse
-// @Failure default {object} errors.ErrorResponse
-// @Router       /chat/public [post]
+// @Summary Create Public Chat
+// @Description Create a public group chat
+// @Tags chats
+// @Accept json
+// @Produce json
+// @Param input body models.CreatePublicChatRequest true "Public Chat Data"
+// @Success 201 {object} models.CreatePrivateChatResponse
+// @Failure 400 {object} errors.ErrorResponse "Bad Request"
+// @Failure 500 {object} errors.ErrorResponse "Internal Server Error"
+// @Router /chat/public [post]
 func (h *Handler) CreatePublicChat(c *gin.Context) {
 	requestID, ok := c.Get(middleware.RequestIDKey)
 	if !ok {
@@ -94,8 +96,8 @@ func (h *Handler) CreatePublicChat(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			"requestID": requestID,
 		}).Errorf("CreatePublicChat: ShouldBindJSON: %v", err)
-		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
-		c.JSON(http.StatusOK, errResp)
+		errResp := customErr.NewErrorResponse(http.StatusBadRequest, "invalid request data")
+		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	res, err := h.service.Chat.CreatePublicChat(id.(string), &req)
@@ -104,25 +106,25 @@ func (h *Handler) CreatePublicChat(c *gin.Context) {
 			"requestID": requestID,
 		}).Errorf("handler.GetMe: CreatePublicChat error: %v", err)
 		errResp := customErr.NewErrorResponse(http.StatusInternalServerError, "internal server error")
-		c.JSON(http.StatusOK, errResp)
+		c.JSON(http.StatusInternalServerError, errResp)
 		return
 	}
 	logrus.WithFields(logrus.Fields{
 		"requestID": requestID,
 	}).Infof("handler.GetMe: CreatePublicChat: %v", res)
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusCreated, res)
 }
 
 // GetMeChats godoc
 // @Security BearerAuth
-// @Summary      GetMeChats
-// @Description  получить свои чаты
-// @Tags         chats
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  models.GetMeChatsResponse
-// @Failure default {object} errors.ErrorResponse
-// @Router       /chat [get]
+// @Summary Get My Chats
+// @Description Retrieve all user chats
+// @Tags chats
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.GetMeChatsResponse
+// @Failure 500 {object} errors.ErrorResponse "Internal Server Error"
+// @Router /chat [get]
 func (h *Handler) GetMeChats(c *gin.Context) {
 	requestID, ok := c.Get(middleware.RequestIDKey)
 	if !ok {

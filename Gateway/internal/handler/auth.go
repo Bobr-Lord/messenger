@@ -11,13 +11,14 @@ import (
 
 // Register godoc
 // @Summary      Регистрация нового пользователя
-// @Description  Регистрирует нового пользователя
+// @Description  Регистрирует нового пользователя. Принимает данные для регистрации и возвращает ответ с информацией о созданном пользователе.
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        input  body  models.RegisterRequest  true  "Данные регистрации"
-// @Success      200  {object}  models.RegisterResponse
-// @Failure default {object} errors.ErrorResponse
+// @Param        input  body  models.RegisterRequest  true  "Данные для регистрации нового пользователя"
+// @Success      200  {object}  models.RegisterResponse  "Успешная регистрация"
+// @Failure      400  {object}  errors.ErrorResponse  "Неверные данные для регистрации"
+// @Failure      500  {object}  errors.ErrorResponse  "Внутренняя ошибка сервера"
 // @Router       /auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	requestId, ok := c.Get(middleware.RequestIDKey)
@@ -55,14 +56,16 @@ func (h *Handler) Register(c *gin.Context) {
 
 // Login godoc
 // @Security BearerAuth
-// @Summary      Login
-// @Description  авторизация и генерация jwt
+// @Summary      Авторизация пользователя
+// @Description  Выполняет авторизацию пользователя и генерирует JWT токен. Принимает данные для входа и возвращает токен при успешной авторизации.
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        input  body  models.LoginRequest  true  "Данные регистрации"
-// @Success      200  {object}  models.LoginResponse
-// @Failure default {object} errors.ErrorResponse
+// @Param        input  body  models.LoginRequest  true  "Данные для авторизации пользователей"
+// @Success      200  {object}  models.LoginResponse  "Успешная авторизация, возвращает JWT токен"
+// @Failure      400  {object}  errors.ErrorResponse  "Неверные данные для авторизации"
+// @Failure      401  {object}  errors.ErrorResponse  "Не авторизован, неверные учетные данные"
+// @Failure      500  {object}  errors.ErrorResponse  "Внутренняя ошибка сервера"
 // @Router       /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	requestId, ok := c.Get(middleware.RequestIDKey)

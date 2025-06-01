@@ -9,8 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/middleware"
 	"gitlab.com/bobr-lord-messenger/gateway/internal/models"
-
-	//"gitlab.com/bobr-lord-messenger/gateway/internal/models"
 	"log"
 	"time"
 )
@@ -18,8 +16,14 @@ import (
 // Websocket godoc
 // @Security BearerAuth
 // @Summary      WebSocket
-// @Description  websocket коннект
+// @Description  Establish a websocket connection for real-time messaging.
 // @Tags         websocket
+// @Accept       json
+// @Produce      json
+// @Param       userID query string true "User ID for the connection"
+// @Success      101 {object} string "Connection Established"
+// @Failure      400 {object} string "Bad Request"
+// @Failure      401 {object} string "Unauthorized"
 // @Router       /ws [get]
 func (h *Handler) Websocket(c *gin.Context) {
 	requestID, exists := c.Get(middleware.RequestIDKey)
@@ -45,6 +49,7 @@ func (h *Handler) Websocket(c *gin.Context) {
 		logrus.WithFields(logrus.Fields{
 			middleware.RequestIDKey: requestID,
 		}).Error(fmt.Sprintf("error upgrading connection: %v", err))
+		c.JSON(400, gin.H{"error": "failed to upgrade connection"})
 		return
 	}
 	defer conn.Close()
